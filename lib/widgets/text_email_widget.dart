@@ -22,49 +22,38 @@ class _TextEmailWidgetState extends State<TextEmailWidget> {
     return Form(
         key: widget.formKey,
         child: Container(
-            margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
+            margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
             child: TextFormField(
                 inputFormatters: [
                   LengthLimitingTextInputFormatter(50),
                 ],
                 textInputAction: TextInputAction.next,
-                style: TextStyle(fontSize: 14),
+                style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColorDark)),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide()),
-                  /* errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide:
-                          BorderSide(color: Theme.of(context).errorColor)), */
                   labelText: widget.label,
                   hintText: widget.hint,
-                  hintStyle: TextStyle(fontSize: 14),
+                  hintStyle: const TextStyle(fontSize: 14),
                   prefixIcon: Container(
-                      margin: EdgeInsets.fromLTRB(14, 0, 14, 0),
-                      child: Icon(Icons.email, size: 14)),
-                  labelStyle: TextStyle(fontSize: 14),
-                  errorStyle: TextStyle(fontSize: 14),
+                      margin: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+                      child: const Icon(Icons.email, size: 14)),
+                  labelStyle: const TextStyle(fontSize: 14),
+                  errorStyle: const TextStyle(fontSize: 14),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                autofillHints: [AutofillHints.email],
+                autofillHints: const [AutofillHints.email],
                 onSaved: (value) {
                   widget.controlador = value;
                 },
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
                   if (value!.isEmpty) {
-                    widget.error=true;
+                    widget.error = true;
                     return "Enter your email";
                   } else if (!EmailValidator.validate(value)) {
-                    widget.error=true;
+                    widget.error = true;
                     return "Enter a valid email";
                   } else if (widget.error) {
-                    widget.error=true;
+                    widget.error = true;
                     return widget.msgError;
                   }
                 },

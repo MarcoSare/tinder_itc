@@ -1,8 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:tinder_itc/routes.dart';
 import 'package:tinder_itc/screens/on_boarding_screen.dart';
 import 'package:tinder_itc/settings/styles_settings.dart';
 
-void main() {
+Future main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -14,6 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      routes: getApplicationRoutes(),
       title: 'Flutter Demo',
       theme: StylesSettings.darkTheme,
       home: const OnBoardingScreen(),

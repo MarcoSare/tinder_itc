@@ -5,57 +5,56 @@ import 'package:tinder_itc/widgets/alert_widget.dart';
 import 'package:tinder_itc/widgets/text_email_widget.dart';
 import 'package:tinder_itc/widgets/text_pass_widget.dart';
 
-
 class Login extends StatelessWidget {
   const Login({super.key});
-  
+
   @override
   Widget build(BuildContext context) {
-  
-    TextEmailWidget txtEmail = TextEmailWidget('Email', 'Escribe email', 'Escribe email válido');
+    TextEmailWidget txtEmail = TextEmailWidget(
+        'Correo', 'Ingresa tu correo', 'Ingresa un correo valido');
     TextPassWidget txtPass = TextPassWidget();
 
     final btnGoogle = SocialLoginButton(
       buttonType: SocialLoginButtonType.google,
-      mode:SocialLoginButtonMode.multi, 
-      onPressed: (){
-
-      },
+      mode: SocialLoginButtonMode.multi,
+      onPressed: () {},
       borderRadius: 15,
     );
 
     final btnFacebook = SocialLoginButton(
-      buttonType: SocialLoginButtonType.facebook, 
-       mode:SocialLoginButtonMode.multi,
-      onPressed: (){
-
-      },
+      buttonType: SocialLoginButtonType.facebook,
+      mode: SocialLoginButtonMode.multi,
+      onPressed: () {},
       borderRadius: 15,
     );
 
     final btnGithub = SocialLoginButton(
-      buttonType: SocialLoginButtonType.github, 
-      mode:SocialLoginButtonMode.multi,
-      onPressed: (){
-
-      },
+      buttonType: SocialLoginButtonType.github,
+      mode: SocialLoginButtonMode.multi,
+      onPressed: () {},
       borderRadius: 15,
     );
 
-    final btnEmail =  SocialLoginButton(
+    final btnEmail = SocialLoginButton(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      text: "Iniciar sesión",
       buttonType: SocialLoginButtonType.generalLogin,
-      mode:SocialLoginButtonMode.single,
-      onPressed: (){
+      mode: SocialLoginButtonMode.single,
+      onPressed: () {
         txtEmail.formKey.currentState!.save();
         txtPass.formKey.currentState!.save();
-        if(txtEmail.controlador=='' || txtPass.controlador==''){
-          AlertWidget.showMessage(context, 'Error', 'Porfavor, rellena todos los campos antes de poder continuar.');
-        }else if(txtEmail.error==true){
-          AlertWidget.showMessage(context, 'Error', 'Porfavor, ingresa una dirección de correo válida');
-        }else if(txtPass.error==true){
-          AlertWidget.showMessage(context, 'Error', 'Porfavor, ingresa tu contraseña');
-        }else{
-          print('''correo: ${txtEmail.controlador}\ncontraseña: ${txtPass.controlador}''');
+        if (txtEmail.controlador == '' || txtPass.controlador == '') {
+          AlertWidget.showMessage(context, 'Error',
+              'Porfavor, rellena todos los campos antes de poder continuar.');
+        } else if (txtEmail.error == true) {
+          AlertWidget.showMessage(context, 'Error',
+              'Porfavor, ingresa una dirección de correo válida');
+        } else if (txtPass.error == true) {
+          AlertWidget.showMessage(
+              context, 'Error', 'Porfavor, ingresa tu contraseña');
+        } else {
+          print(
+              '''correo: ${txtEmail.controlador}\ncontraseña: ${txtPass.controlador}''');
         }
       },
       borderRadius: 15,
@@ -65,25 +64,17 @@ class Login extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextButton(
-          onPressed: (){
-            Navigator.pushNamed(context, '/register');
-          }, 
-          child: const Text('Crear cuenta')
-        ),
-        TextButton(
-          onPressed: (){}, 
-          child: const Text('Recuperar contraseña')
-        ),
+            onPressed: () {
+              Navigator.pushNamed(context, '/register');
+            },
+            child: const Text('Crear cuenta')),
+        TextButton(onPressed: () {}, child: const Text('Recuperar contraseña')),
       ],
     );
 
     final formEmailPass = Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        txtEmail,
-        txtPass,
-        btnEmail
-      ],
+      children: [txtEmail, txtPass, btnEmail],
     );
 
     final rowSocial = SizedBox(
@@ -91,11 +82,7 @@ class Login extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.max,
-        children: [
-          btnGoogle,
-          btnFacebook,
-          btnGithub
-        ],
+        children: [btnGoogle, btnFacebook, btnGithub],
       ),
     );
 
@@ -107,7 +94,8 @@ class Login extends StatelessWidget {
       ],
     );
 
-    Widget formLogin(BuildContext context, Column form, SizedBox social, Row divider, Row options ){
+    Widget formLogin(BuildContext context, Column form, SizedBox social,
+        Row divider, Row options) {
       return SizedBox(
         width: 450,
         child: Column(
@@ -119,11 +107,9 @@ class Login extends StatelessWidget {
               height: 200,
               margin: const EdgeInsets.only(bottom: 20),
               decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/logo.png'),
-                  fit: BoxFit.fill
-                )
-              ),
+                  image: DecorationImage(
+                      image: AssetImage('assets/images/logo_tinder_itc.png'),
+                      fit: BoxFit.fill)),
             ),
             form,
             Padding(
@@ -136,16 +122,15 @@ class Login extends StatelessWidget {
         ),
       );
     }
-  
+
     return Scaffold(
       body: Responsive(
-        mobile: MobileViewScreen(
-          formLogin: formLogin(context, formEmailPass, rowSocial, rowDivider, rowOptions)
-        ), 
-        desktop: DesktopViewScreen(
-          formLogin: formLogin(context, formEmailPass, rowSocial, rowDivider, rowOptions)
-        )
-      ),
+          mobile: MobileViewScreen(
+              formLogin: formLogin(
+                  context, formEmailPass, rowSocial, rowDivider, rowOptions)),
+          desktop: DesktopViewScreen(
+              formLogin: formLogin(
+                  context, formEmailPass, rowSocial, rowDivider, rowOptions))),
     );
   }
 }
@@ -160,7 +145,6 @@ class MobileViewScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: const Color.fromARGB(85, 76, 175, 79),
       padding: const EdgeInsets.all(10),
       child: Center(
         child: SingleChildScrollView(
@@ -184,25 +168,21 @@ class DesktopViewScreen extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            flex: 2,
-            child: Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/logo.png'),
-                  fit: BoxFit.fill
-                )
-              ),
-            )
-          ),
+              flex: 2,
+              child: Container(
+                decoration: const BoxDecoration(
+                    image: DecorationImage(
+                        image: AssetImage('assets/logo.png'),
+                        fit: BoxFit.fill)),
+              )),
           Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: SingleChildScrollView(
-                child: formLogin,
-              ),
-            )
-          )
+              flex: 1,
+              child: Padding(
+                padding: const EdgeInsets.all(15.0),
+                child: SingleChildScrollView(
+                  child: formLogin,
+                ),
+              ))
         ],
       ),
     );

@@ -30,7 +30,7 @@ class _TextFormWidgetState extends State<TextFormWidget> {
     return Form(
         key: widget.formKey,
         child: Container(
-            margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
+            margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
             child: TextFormField(
                 maxLines: widget.maxLines ?? 1,
                 textInputAction: TextInputAction.next,
@@ -39,16 +39,6 @@ class _TextFormWidgetState extends State<TextFormWidget> {
                 ],
                 style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColorDark)),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColorDark)),
                   labelText: widget.label,
                   hintText: widget.hint,
                   hintStyle: const TextStyle(fontSize: 14),
