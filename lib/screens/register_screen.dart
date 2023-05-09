@@ -71,10 +71,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       case 2:
         if(multiSelectInter!.formKey.currentState!.validate()){
           print(multiSelectInter!.interestsList);
+          //Aqui se manda el registro a firebase auth y storage
           _index.value++;
         }
 
-        //Aqui se manda el registro a firebase auth y storage
+        
       break;
 
     }

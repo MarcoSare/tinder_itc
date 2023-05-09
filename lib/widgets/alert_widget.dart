@@ -22,5 +22,16 @@ class AlertWidget {
       )
     );
   }
+
+  static Future<void> showMessageWithActions(BuildContext context,String title, String message, List<Widget>? actions) async {
+    showDialog(
+      context: context, 
+      builder: (context)=>AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: actions
+      )
+    );
+  }
   
 }

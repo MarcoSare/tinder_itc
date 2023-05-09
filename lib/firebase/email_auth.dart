@@ -32,11 +32,31 @@ class EmailAuth {
         password: password
       );
       if(userCredential.user!.emailVerified){
+        userCredential.user!.sendEmailVerification();
         //agregar información del usuario al provider o preferencias de usuario (SharedPreferences)
         return 'logged-in-successfully';
       } return 'email-not-verified';
     } on FirebaseAuthException catch (e){
       return e.code;
+    }
+  }
+
+  Future<String> resendVerification({
+    required email,
+    required password
+  }) async{
+    try {
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email, 
+        password: password
+      );
+
+      if(userCredential.user!.emailVerified==false){
+        userCredential.user!.sendEmailVerification();
+        return 'email-resent';
+      } return 'email-already-verified';
+    } catch (e) {
+      return 'error';
     }
   }
 }

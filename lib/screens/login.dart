@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
+import 'package:tinder_itc/firebase/email_auth.dart';
+import 'package:tinder_itc/firebase/github_auth.dart';
+import 'package:tinder_itc/firebase/google_auth.dart';
 import 'package:tinder_itc/responsive.dart';
 import 'package:tinder_itc/widgets/alert_widget.dart';
 import 'package:tinder_itc/widgets/text_email_widget.dart';
@@ -14,12 +17,21 @@ class Login extends StatelessWidget {
   
     TextEmailWidget txtEmail = TextEmailWidget('Email', 'Escribe email', 'Escribe email válido');
     TextPassWidget txtPass = TextPassWidget();
+    EmailAuth _emailAuth = EmailAuth();
+    GoogleAuth _googleAuth = GoogleAuth();
+    GithubAuth _githubAuth = GithubAuth();
 
     final btnGoogle = SocialLoginButton(
       buttonType: SocialLoginButtonType.google,
       mode:SocialLoginButtonMode.multi, 
       onPressed: (){
-
+        _googleAuth.signInWithGoogle().then((value) {
+          if(value=='successful-register'){
+            AlertWidget.showMessage(context, 'Registro exitoso', 'Tu cuenta de google ha sido creada correctamente');
+          }else{
+            print(value);
+          }
+        });
       },
       borderRadius: 15,
     );
@@ -37,9 +49,36 @@ class Login extends StatelessWidget {
       buttonType: SocialLoginButtonType.github, 
       mode:SocialLoginButtonMode.multi,
       onPressed: (){
-
+        _githubAuth.signInWithGitHub(context).then((value) {
+          if(value=='successful-register'){
+            AlertWidget.showMessage(context, 'Registro exitoso', 'Tu cuenta de google ha sido creada correctamente');
+          }else if(value=='account-exists-with-different-credential'){
+            AlertWidget.showMessage(context, 'Error al iniciar sesión', 'Parece que el correo que estas intentando utilizar ya esta vinculada con otra cuenta...');
+          }
+        });
       },
       borderRadius: 15,
+    );
+
+    final btnResend = TextButton(
+      onPressed: (){
+        _emailAuth.resendVerification(
+          email: txtEmail.controlador, 
+          password: txtPass.controlador
+        ).then((value) {
+          if(value=='email-resent'){
+            AlertWidget.showMessage(context, 'Exitoso', 'Correo de verificación reenviado correctamente');
+          }
+        });
+      }, 
+      child: const Text('Reenviar verificación')
+    );
+
+    final btnOk = TextButton(
+      onPressed: (){
+        Navigator.pop(context);
+      }, 
+      child: const Text('Ok')
     );
 
     final btnEmail =  SocialLoginButton(
@@ -55,7 +94,28 @@ class Login extends StatelessWidget {
         }else if(txtPass.error==true){
           AlertWidget.showMessage(context, 'Error', 'Porfavor, ingresa tu contraseña');
         }else{
-          print('''correo: ${txtEmail.controlador}\ncontraseña: ${txtPass.controlador}''');
+          _emailAuth.signInWithEmailAndPass(
+            email: txtEmail.controlador, 
+            password: txtPass.controlador
+          ).then((value){
+            switch(value){
+              case 'wrong-password':
+
+              break;
+
+              case 'invalid-email':
+              
+              break;
+
+              case 'user-not-found':
+
+              break;
+
+              case 'email-not-verified':
+
+              break;
+            }
+          });
         }
       },
       borderRadius: 15,
@@ -132,6 +192,7 @@ class Login extends StatelessWidget {
             ),
             divider,
             social,
+            ElevatedButton(onPressed: (){ _googleAuth.signOutFromGoogle();}, child: Text('logout google'))
           ],
         ),
       );
