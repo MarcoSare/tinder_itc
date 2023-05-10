@@ -16,7 +16,7 @@ class _TextPassWidgetState extends State<TextPassWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        margin: EdgeInsets.fromLTRB(0, 5, 0, 5),
+        margin: const EdgeInsets.fromLTRB(0, 5, 0, 5),
         child: Form(
             key: widget.formKey,
             child: TextFormField(
@@ -25,32 +25,21 @@ class _TextPassWidgetState extends State<TextPassWidget> {
                   LengthLimitingTextInputFormatter(50),
                 ],
                 obscureText: widget.visible,
-                style: TextStyle(fontSize: 14),
+                style: const TextStyle(fontSize: 14),
                 decoration: InputDecoration(
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColorDark)),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide()),
-                  errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide(
-                          color: Theme.of(context).primaryColorDark)),
-                  labelText: "Password",
-                  hintText: ("Enter your password"),
-                  hintStyle: TextStyle(fontSize: 14),
+                  labelText: "Contraseña",
+                  hintText: ("Ingresa tu contraseña"),
+                  hintStyle: const TextStyle(fontSize: 14),
                   prefixIcon: Container(
-                    margin: EdgeInsets.fromLTRB(14, 0, 14, 0),
-                    child: Icon(Icons.vpn_key_sharp, size: 14),
+                    margin: const EdgeInsets.fromLTRB(14, 0, 14, 0),
+                    child: const Icon(Icons.vpn_key_sharp, size: 14),
                   ),
                   suffixIcon: IconButton(
                     icon: widget.visible
-                        ? Icon(
+                        ? const Icon(
                             Icons.visibility_off,
                           )
-                        : Icon(Icons.visibility),
+                        : const Icon(Icons.visibility),
                     onPressed: () {
                       setState(() => widget.visible = !widget.visible);
                     },
