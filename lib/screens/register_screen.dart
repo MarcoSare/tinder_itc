@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/screens/register_pages.dart';
@@ -42,6 +43,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       5);
   MultiSelectChipWidget? multiSelectInter;
   late AlertWidget alertWidget;
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  User? currentUser;
 
   @override
   void initState() {
@@ -67,6 +70,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'atardecer'
     ];
     multiSelectInter = MultiSelectChipWidget(items: interests!);
+    if(_auth.currentUser != null){ //Se entra aqui si se viene de algun proveedor de atenticación
+      currentUser=_auth.currentUser!;
+      _index.value=1;
+    }
   }
 
   Widget _showPage() {
@@ -127,7 +134,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       case 2:
         if (multiSelectInter!.formKey.currentState!.validate()) {
           alertWidget.showProgress();
-          await createUser();
+          (currentUser != null)? await createUserAuthProvider(): await createUser();
           alertWidget.closeProgress();
           _index.value++;
         }
@@ -199,9 +206,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                           size: 50,
                                         ),
                                   onPressed: () {
-                                    _index.value--;
-                                    if (_index.value < 0) {
+                                    if (_index.value <= 0) {
                                       Navigator.pushNamed(context, '/login');
+                                    }else if(_index.value==1 && currentUser != null){
+                                      Fluttertoast.showToast(msg: 'Completa el registro por favor...', toastLength: Toast.LENGTH_LONG);
+                                    }else{
+                                      _index.value--;
                                     }
                                   },
                                 ),
@@ -279,6 +289,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
       }
     } catch (e) {
       print(e);
+    }
+  }
+
+  Future createUserAuthProvider() async {
+    try{
+      final docUser = FirebaseFirestore.instance.collection('usuarios').doc(currentUser!.uid);
+      final user = UserModel(
+        name: currentUser!.displayName,
+        email: currentUser!.email,
+        carrer: RegisterPage2.selectedCareer,
+        semester: int.parse(RegisterPage2.selectedSemester.toString()),
+        aboutMe: txtDescripcion.controlador,
+        interests: multiSelectInter?.interestsList,
+        profilePicture: currentUser!.photoURL
+      );
+      final userJSON = user.toJson();
+
+      await docUser.set(userJSON).then((value) => print('usuario registrado con exito: ${currentUser!.uid}'));
+
+    }on FirebaseAuthException catch (e){
+      print(e.code);
+    } catch (e){
+      print (e);
     }
   }
 

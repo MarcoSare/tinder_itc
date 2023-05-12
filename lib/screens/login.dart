@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
@@ -9,8 +11,16 @@ import 'package:tinder_itc/widgets/alert_widget.dart';
 import 'package:tinder_itc/widgets/text_email_widget.dart';
 import 'package:tinder_itc/widgets/text_pass_widget.dart';
 
-class Login extends StatelessWidget {
-  const Login({super.key});
+class Login extends StatefulWidget {
+  Login({super.key});
+
+  @override
+  State<Login> createState() => _LoginState();
+}
+
+class _LoginState extends State<Login> {
+
+  late AlertWidget al;
 
   @override
   Widget build(BuildContext context) {
@@ -20,43 +30,7 @@ class Login extends StatelessWidget {
     EmailAuth _emailAuth = EmailAuth();
     GoogleAuth _googleAuth = GoogleAuth();
     GithubAuth _githubAuth = GithubAuth();
-
-    final btnGoogle = SocialLoginButton(
-      buttonType: SocialLoginButtonType.google,
-      mode:SocialLoginButtonMode.multi, 
-      onPressed: (){
-        _googleAuth.signInWithGoogle().then((value) {
-          if(value=='successful-register'){
-            AlertWidget.showMessage(context, 'Registro exitoso', 'Tu cuenta de google ha sido creada correctamente');
-          }else{
-            print(value);
-          }
-        });
-      },
-      borderRadius: 15,
-    );
-
-    final btnFacebook = SocialLoginButton(
-      buttonType: SocialLoginButtonType.facebook,
-      mode: SocialLoginButtonMode.multi,
-      onPressed: () {},
-      borderRadius: 15,
-    );
-
-    final btnGithub = SocialLoginButton(
-      buttonType: SocialLoginButtonType.github, 
-      mode:SocialLoginButtonMode.multi,
-      onPressed: (){
-        _githubAuth.signInWithGitHub(context).then((value) {
-          if(value=='successful-register'){
-            AlertWidget.showMessage(context, 'Registro exitoso', 'Tu cuenta de google ha sido creada correctamente');
-          }else if(value=='account-exists-with-different-credential'){
-            AlertWidget.showMessage(context, 'Error al iniciar sesión', 'Parece que el correo que estas intentando utilizar ya esta vinculada con otra cuenta...');
-          }
-        });
-      },
-      borderRadius: 15,
-    );
+    al = AlertWidget(context: context);
 
     final btnResend = TextButton(
       onPressed: (){
@@ -84,10 +58,60 @@ class Login extends StatelessWidget {
       child: const Text('Ok')
     );
 
+
+    final btnRedirectReg = ElevatedButton(
+      onPressed: (){
+        Navigator.pushNamed(context, '/register');
+      },
+      child: const Text('Completar registro')
+    );
+
+
     List<Widget> optionsResend = [
       btnResend,
       btnOk
     ];
+
+    final btnGoogle = SocialLoginButton(
+      buttonType: SocialLoginButtonType.google,
+      mode:SocialLoginButtonMode.multi, 
+      onPressed: (){
+        _googleAuth.signInWithGoogle().then((value) {
+          if(value=='logged-successful'){
+            //redireccionar al dashboard
+            AlertWidget.showMessage(context, 'Acceso exitoso', 'Has ingresado a tu cuenta');
+          }else if(value=='logged-without-info'){
+            //redireccionar al register_screen - RegisterScreen debe 
+            AlertWidget.showMessageWithActions(context, 'Creación exitoso', 'Tu cuenta de google ha sido creada correctamente, procede a completar el registro porfavor', [btnRedirectReg]);
+          }
+        });
+      },
+      borderRadius: 15,
+    );
+
+    final btnFacebook = SocialLoginButton(
+      buttonType: SocialLoginButtonType.facebook,
+      mode: SocialLoginButtonMode.multi,
+      onPressed: () {},
+      borderRadius: 15,
+    );
+
+    final btnGithub = SocialLoginButton(
+      buttonType: SocialLoginButtonType.github, 
+      mode:SocialLoginButtonMode.multi,
+      onPressed: (){
+        _githubAuth.signInWithGitHub(context).then((value) {
+          if(value=='logged-succesful'){
+            AlertWidget.showMessage(context, 'Inicio de sesión exitoso', 'Continua con tu experiencia...');
+          }else if(value=='logged-without-info'){
+            AlertWidget.showMessageWithActions(context, 'Registro exitoso', 'Tu cuenta  ha sido creada correctamente', [btnRedirectReg]);
+          }else if(value=='account-exists-with-different-credential'){
+            AlertWidget.showMessage(context, 'Error al iniciar sesión', 'Parece que el correo que estas intentando utilizar ya esta vinculada con otra cuenta...');
+          }
+        });
+      },
+      borderRadius: 15,
+    );
 
     final btnEmail =  SocialLoginButton(
       buttonType: SocialLoginButtonType.generalLogin,
@@ -192,7 +216,8 @@ class Login extends StatelessWidget {
             ),
             divider,
             social,
-            ElevatedButton(onPressed: (){ _googleAuth.signOutFromGoogle();}, child: Text('logout google'))
+            /* ElevatedButton(onPressed: (){ _googleAuth.signOutFromGoogle();}, child: Text('logout google')),
+            ElevatedButton(onPressed: (){ _githubAuth.signOutFromGitHub();}, child: Text('logout git')) */
           ],
         ),
       );
