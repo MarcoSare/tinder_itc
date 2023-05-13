@@ -1,12 +1,17 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:tinder_itc/app_preferences.dart';
 import 'package:tinder_itc/routes.dart';
+import 'package:tinder_itc/screens/login.dart';
 import 'package:tinder_itc/screens/on_boarding_screen.dart';
 import 'package:tinder_itc/settings/styles_settings.dart';
+import 'package:tinder_itc/user_preferences_dev.dart';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await UserPreferencesDev.preferences();
+  await AppPreferences.preferences();
   runApp(const MyApp());
 }
 
@@ -21,7 +26,7 @@ class MyApp extends StatelessWidget {
       routes: getApplicationRoutes(),
       title: 'Flutter Demo',
       theme: StylesSettings.darkTheme,
-      home: const OnBoardingScreen(),
+      home: AppPreferences.firstTimeOpen? const OnBoardingScreen() : Login(),
     );
   }
 }

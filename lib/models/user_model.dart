@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:firebase_auth/firebase_auth.dart';
+
 class UserModel {
   String? id;
   String? name;
@@ -19,6 +23,24 @@ class UserModel {
       this.semester,
       this.aboutMe,
       this.interests});
+
+  factory UserModel.fromMap(Map<String,dynamic> map){
+    return UserModel(
+      id: map['id'],
+      name: map['name'],
+      email: map['email'],
+      pass: map['pass'],
+      profilePicture: map['profilePicture'],
+      carrer: map['career'],
+      semester: map['semester'],
+      aboutMe: map['aboutMe'],
+      interests: List<String?>.from(map['interests']),
+    );
+  }
+
+  static String toMap(UserModel user){
+    return json.encode(user);
+  }
 
   Map<String, dynamic> toJson() => {
         'id': id,

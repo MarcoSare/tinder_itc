@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
+import 'package:tinder_itc/app_preferences.dart';
 import 'package:tinder_itc/firebase/email_auth.dart';
 import 'package:tinder_itc/firebase/github_auth.dart';
 import 'package:tinder_itc/firebase/google_auth.dart';
 import 'package:tinder_itc/responsive.dart';
+import 'package:tinder_itc/user_preferences_dev.dart';
 import 'package:tinder_itc/widgets/alert_widget.dart';
 import 'package:tinder_itc/widgets/text_email_widget.dart';
 import 'package:tinder_itc/widgets/text_pass_widget.dart';
@@ -21,6 +24,7 @@ class Login extends StatefulWidget {
 class _LoginState extends State<Login> {
 
   late AlertWidget al;
+  DateTime? currenBackTime;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +35,7 @@ class _LoginState extends State<Login> {
     GoogleAuth _googleAuth = GoogleAuth();
     GithubAuth _githubAuth = GithubAuth();
     al = AlertWidget(context: context);
+    
 
     final btnResend = TextButton(
       onPressed: (){
@@ -132,15 +137,15 @@ class _LoginState extends State<Login> {
           ).then((value){
             switch(value){
               case 'wrong-password':
-
+                AlertWidget.showMessage(context, 'Error', 'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
               break;
 
               case 'invalid-email':
-              
+                AlertWidget.showMessage(context, 'Error', 'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
               break;
 
               case 'user-not-found':
-
+                AlertWidget.showMessage(context, 'Error', 'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
               break;
 
               case 'email-not-verified':
@@ -216,23 +221,41 @@ class _LoginState extends State<Login> {
             ),
             divider,
             social,
-            /* ElevatedButton(onPressed: (){ _googleAuth.signOutFromGoogle();}, child: Text('logout google')),
-            ElevatedButton(onPressed: (){ _githubAuth.signOutFromGitHub();}, child: Text('logout git')) */
           ],
         ),
       );
     }
 
+    Future<bool> onWillPop() async {
+      DateTime now = DateTime.now();
+      if(currenBackTime == null || now.difference(currenBackTime!)> const Duration(seconds: 15)){
+        currenBackTime = now;
+        Fluttertoast.showToast(msg: '¿Seguro que quieres salir?');
+        return false;
+      }else{
+        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+        return false;
+      }
+    }
+
     return Scaffold(
-      body: Responsive(
-          mobile: MobileViewScreen(
+      body: WillPopScope(
+        onWillPop: onWillPop,
+        child: Responsive(
+            mobile: MobileViewScreen(
               formLogin: formLogin(
-                  context, formEmailPass, rowSocial, rowDivider, rowOptions)),
-          desktop: DesktopViewScreen(
+                context, formEmailPass, rowSocial, rowDivider, rowOptions
+                )
+              ),
+            desktop: DesktopViewScreen(
               formLogin: formLogin(
-                  context, formEmailPass, rowSocial, rowDivider, rowOptions))),
-    );
-  }
+                context, formEmailPass, rowSocial, rowDivider, rowOptions
+              ) 
+            )
+          ),
+        ),
+      );
+    }
 }
 
 class MobileViewScreen extends StatelessWidget {
