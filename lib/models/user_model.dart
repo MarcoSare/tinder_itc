@@ -1,9 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class UserModel {
   String? id;
   String? name;
   String? email;
   String? pass;
   String? profilePicture;
+  String? birthdate;
+  String? gender;
   String? carrer;
   int? semester;
   String? aboutMe;
@@ -15,6 +19,8 @@ class UserModel {
       this.email,
       this.pass,
       this.profilePicture,
+      this.gender,
+      this.birthdate,
       this.carrer,
       this.semester,
       this.aboutMe,
@@ -26,9 +32,26 @@ class UserModel {
         'email': email,
         'pass': pass,
         'profile_picture': profilePicture,
+        'birthdate': birthdate,
+        'gender': gender,
         'carrer': carrer,
         'semester': semester,
         'aboutMe': aboutMe,
         'interests': interests
       };
+
+  factory UserModel.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> map = doc.data() as Map<String, dynamic>;
+    return UserModel(
+      id: map['id'],
+      name: map['name'],
+      email: map['email'],
+      profilePicture: map['profile_picture'],
+      birthdate: map['birthdate'],
+      gender: map['gender'],
+      carrer: map['carrer'],
+      semester: map['semester'],
+      aboutMe: map['aboutMe'],
+    );
+  }
 }
