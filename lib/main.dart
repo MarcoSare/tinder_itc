@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tinder_itc/routes.dart';
+import 'package:tinder_itc/screens/dashboard_screen.dart';
 import 'package:tinder_itc/screens/home_screen.dart';
 import 'package:tinder_itc/screens/match_screen.dart';
 import 'package:tinder_itc/screens/on_boarding_screen.dart';
@@ -22,8 +23,8 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: getApplicationRoutes(),
       title: 'Flutter Demo',
-      theme: StylesSettings.darkTheme,
-      home: const MatchScreen(),
+      theme: StylesSettings.lightTheme,
+      home: const DashBoardScreen(),
     );
   }
 }

@@ -9,51 +9,57 @@ class GithubAuth {
 
   Future<String> signInWithGitHub(BuildContext context) async {
     final GitHubSignIn gitSignIn = GitHubSignIn(
-      clientId: keys.GIT_CLIENT_ID, 
-      clientSecret: keys.GIT_CLIENT_SECRET, 
-      redirectUrl: 'https://tinder-itc.firebaseapp.com/__/auth/handler'
-    );
+        clientId: keys.GIT_CLIENT_ID,
+        clientSecret: keys.GIT_CLIENT_SECRET,
+        redirectUrl: 'https://tinder-itc.firebaseapp.com/__/auth/handler');
 
     final result = await gitSignIn.signIn(context);
 
-    switch(result.status){
-      case GitHubSignInResultStatus.ok:{
-        try {
-          final gitAuthCredential = GithubAuthProvider.credential(result.token!);
-          final user = await FirebaseAuth.instance.signInWithCredential(gitAuthCredential);
-          if(await hasUserData(user.user!.uid)){
-            return 'logged-succesful';
-          } return 'logged-without-info';
-        } on FirebaseAuthException catch (e) {
-          return e.code;
+    switch (result.status) {
+      case GitHubSignInResultStatus.ok:
+        {
+          try {
+            final gitAuthCredential =
+                GithubAuthProvider.credential(result.token!);
+            final user = await FirebaseAuth.instance
+                .signInWithCredential(gitAuthCredential);
+            if (await hasUserData(user.user!.uid)) {
+              return 'logged-succesful';
+            }
+            return 'logged-without-info';
+          } on FirebaseAuthException catch (e) {
+            return e.code;
+          }
         }
-      }
 
-      case GitHubSignInResultStatus.cancelled:{
-        return 'sign-in-cancelled';
-      }
+      case GitHubSignInResultStatus.cancelled:
+        {
+          return 'sign-in-cancelled';
+        }
 
-      case GitHubSignInResultStatus.failed:{
-        return 'sign-in-failed';
-      }
-
+      case GitHubSignInResultStatus.failed:
+        {
+          return 'sign-in-failed';
+        }
     }
   }
 
   Future<String> signOutFromGitHub() async {
-    try{
+    try {
       await FirebaseAuth.instance.signOut();
       return 'successful-sign-out';
-    } on FirebaseAuthException catch (e){
+    } on FirebaseAuthException catch (e) {
       return e.code;
     }
   }
 
   Future<bool> hasUserData(String idUser) async {
-    final userDoc = FirebaseFirestore.instance.collection('usuarios').doc(idUser);
+    final userDoc =
+        FirebaseFirestore.instance.collection('usuarios').doc(idUser);
     final snapshot = await userDoc.get();
-    if(snapshot.exists){
+    if (snapshot.exists) {
       return true;
-    } return false;
+    }
+    return false;
   }
 }
