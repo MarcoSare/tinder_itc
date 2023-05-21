@@ -1,5 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:tinder_itc/app_preferences.dart';
 
 class OnBoardingScreen extends StatefulWidget {
   const OnBoardingScreen({super.key});
@@ -93,6 +94,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                               duration: const Duration(seconds: 1),
                               curve: Curves.decelerate);
                           if (_pageIndex == 2) {
+                            AppPreferences.firstTimeOpen=false;
                             Navigator.pushNamed(context, '/login');
                           }
                         },

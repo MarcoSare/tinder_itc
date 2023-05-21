@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tinder_itc/firebase/database.dart';
+import 'package:tinder_itc/models/user_model.dart';
+import 'package:tinder_itc/user_preferences_dev.dart';
 
 class EmailAuth {
 
@@ -15,7 +19,6 @@ class EmailAuth {
         password: password
       );
       userCredential.user!.sendEmailVerification();
-      //agregar los datos del usuario (foto, intereses, descripción, estado civil, etc...) a Firebase
       return 'user-registered';
     }on FirebaseAuthException catch (e){
       return e.code;
@@ -32,8 +35,11 @@ class EmailAuth {
         password: password
       );
       if(userCredential.user!.emailVerified){
-        userCredential.user!.sendEmailVerification();
+        /* userCredential.user!.sendEmailVerification(); */
         //agregar información del usuario al provider o preferencias de usuario (SharedPreferences)
+
+        await Database.saveUserPrefs(userCredential);
+
         return 'logged-in-successfully';
       } return 'email-not-verified';
     } on FirebaseAuthException catch (e){
@@ -59,4 +65,15 @@ class EmailAuth {
       return 'error';
     }
   }
+
+
+  Future<String> signOutFromEmail() async {
+    try{
+      await FirebaseAuth.instance.signOut();
+      return 'successful-sign-out';
+    } on FirebaseAuthException catch (e){
+      return e.code;
+    }
+  }
+
 }

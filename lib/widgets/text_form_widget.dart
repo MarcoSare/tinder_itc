@@ -54,6 +54,7 @@ class _TextFormWidgetState extends State<TextFormWidget> {
                 onSaved: (value) {
                   widget.controlador = value;
                 },
+                initialValue: widget.controlador,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
                 validator: (value) {
                   if (value!.isEmpty) {
