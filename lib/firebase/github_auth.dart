@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:github_sign_in/github_sign_in.dart';
+import 'package:tinder_itc/firebase/database.dart';
 import 'package:tinder_itc/keys.dart' as keys;
 
 class GithubAuth {
@@ -22,6 +23,9 @@ class GithubAuth {
           final gitAuthCredential = GithubAuthProvider.credential(result.token!);
           final user = await FirebaseAuth.instance.signInWithCredential(gitAuthCredential);
           if(await hasUserData(user.user!.uid)){
+            
+            await Database.saveUserPrefs(user);
+
             return 'logged-succesful';
           } return 'logged-without-info';
         } on FirebaseAuthException catch (e) {

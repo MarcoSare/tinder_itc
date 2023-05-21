@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:tinder_itc/firebase/database.dart';
 
 class GoogleAuth{
  GoogleSignIn? _googleSignIn;
@@ -23,6 +24,9 @@ class GoogleAuth{
     final user = await FirebaseAuth.instance.signInWithCredential(credential);//agregar credenciales a preferencias de usuario 
     
     if(await hasUserData(user.user!.uid)){
+
+      await Database.saveUserPrefs(user);
+
       return 'logged-successful';
     } return 'logged-without-info';
 

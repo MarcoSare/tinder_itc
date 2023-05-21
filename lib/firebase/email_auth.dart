@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tinder_itc/firebase/database.dart';
 import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/user_preferences_dev.dart';
 
@@ -37,7 +38,7 @@ class EmailAuth {
         /* userCredential.user!.sendEmailVerification(); */
         //agregar información del usuario al provider o preferencias de usuario (SharedPreferences)
 
-        await saveUserPrefs(userCredential);
+        await Database.saveUserPrefs(userCredential);
 
         return 'logged-in-successfully';
       } return 'email-not-verified';
@@ -65,11 +66,6 @@ class EmailAuth {
     }
   }
 
-  Future<UserModel> getUserData(String uid) async {
-    final docUser = FirebaseFirestore.instance.collection('usuarios').doc(uid);
-    final doc = await docUser.get();
-    return UserModel.fromMap(doc.data()!);
-  }
 
   Future<String> signOutFromEmail() async {
     try{
@@ -78,11 +74,6 @@ class EmailAuth {
     } on FirebaseAuthException catch (e){
       return e.code;
     }
-  }
-
-  Future saveUserPrefs(UserCredential creds) async {
-    final userData = await getUserData(creds.user!.uid);
-    UserPreferencesDev.user=UserModel.toMap(userData);
   }
 
 }

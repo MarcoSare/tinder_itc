@@ -5,6 +5,7 @@ import 'package:multi_select_flutter/util/multi_select_item.dart';
 class MultiSelectChipWidget extends StatefulWidget {
   MultiSelectChipWidget({super.key, required this.items});
 
+  var initialValues;
   List<String?> items;
   List<String?> interestsList=[];
 
@@ -34,6 +35,7 @@ class _MultiSelectChipWidgetState extends State<MultiSelectChipWidget> {
           });
         },
         title: const Text('Selecciona tus intereses'),
+        initialValue: widget.initialValues,
       ),
     );
   }

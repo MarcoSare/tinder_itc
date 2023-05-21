@@ -3,11 +3,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
 import 'package:social_login_buttons/social_login_buttons.dart';
 import 'package:tinder_itc/app_preferences.dart';
 import 'package:tinder_itc/firebase/email_auth.dart';
 import 'package:tinder_itc/firebase/github_auth.dart';
 import 'package:tinder_itc/firebase/google_auth.dart';
+import 'package:tinder_itc/models/user_model.dart';
+import 'package:tinder_itc/provider/user_provider.dart';
 import 'package:tinder_itc/responsive.dart';
 import 'package:tinder_itc/user_preferences_dev.dart';
 import 'package:tinder_itc/widgets/alert_widget.dart';
@@ -35,6 +38,8 @@ class _LoginState extends State<Login> {
     GoogleAuth _googleAuth = GoogleAuth();
     GithubAuth _githubAuth = GithubAuth();
     al = AlertWidget(context: context);
+
+    final userProvider = Provider.of<UserProvider>(context,listen: false);
     
 
     final btnResend = TextButton(
@@ -85,6 +90,8 @@ class _LoginState extends State<Login> {
           if(value=='logged-successful'){
             //redireccionar al dashboard
             AlertWidget.showMessage(context, 'Acceso exitoso', 'Has ingresado a tu cuenta');
+            userProvider.setUserData(UserPreferencesDev.getUserObject());
+            
           }else if(value=='logged-without-info'){
             //redireccionar al register_screen - RegisterScreen debe 
             AlertWidget.showMessageWithActions(context, 'Creación exitoso', 'Tu cuenta de google ha sido creada correctamente, procede a completar el registro porfavor', [btnRedirectReg]);
@@ -108,6 +115,7 @@ class _LoginState extends State<Login> {
         _githubAuth.signInWithGitHub(context).then((value) {
           if(value=='logged-succesful'){
             AlertWidget.showMessage(context, 'Inicio de sesión exitoso', 'Continua con tu experiencia...');
+            userProvider.setUserData(UserPreferencesDev.getUserObject());
           }else if(value=='logged-without-info'){
             AlertWidget.showMessageWithActions(context, 'Registro exitoso', 'Tu cuenta  ha sido creada correctamente', [btnRedirectReg]);
           }else if(value=='account-exists-with-different-credential'){
@@ -151,6 +159,9 @@ class _LoginState extends State<Login> {
               case 'email-not-verified':
                 AlertWidget.showMessageWithActions(context, 'Error', 'Parece que aún no vertificas tu email...', optionsResend);
               break;
+
+              default:
+                userProvider.setUserData(UserPreferencesDev.getUserObject());
             }
           });
         }
@@ -221,6 +232,13 @@ class _LoginState extends State<Login> {
             ),
             divider,
             social,
+            ElevatedButton(onPressed: (){
+              Navigator.pushNamed(context, '/update_profile');
+            }, child: Text('update profile')),
+            ElevatedButton(onPressed: (){ 
+              UserModel model = userProvider.getUserData() ?? UserModel();
+              print(model.toJson());
+            }, child: Text('USER Pefs'))
           ],
         ),
       );
