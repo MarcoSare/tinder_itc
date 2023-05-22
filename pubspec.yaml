@@ -57,6 +57,7 @@ dependencies:
   dio: ^5.1.2
   swipeable_card_stack: ^0.0.5
   firebase_messaging: ^14.6.1
+  flutter_local_notifications: ^14.1.0
 
 
 
