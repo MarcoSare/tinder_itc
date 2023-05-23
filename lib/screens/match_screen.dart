@@ -1,8 +1,9 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:swipeable_card_stack/swipeable_card_stack.dart';
-import 'package:tinder_itc/firebase/users_firebase.dart';
 import 'package:tinder_itc/models/user_model.dart';
+import 'package:tinder_itc/network/api_users.dart';
 import 'package:tinder_itc/screens/details_user.dart';
 
 class MatchScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _MatchScreenState extends State<MatchScreen> {
     return Scaffold(
       body: Center(
         child: FutureBuilder(
-          future: UsersFireBase.getAllUsers(),
+          future: ApiUsers.getAllUsers(),
           builder: (context, AsyncSnapshot<List<UserModel>> snapshot) {
             if (snapshot.hasData) {
               return Stack(children: [
@@ -224,84 +225,91 @@ Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       ]),
 */
   Widget getCard({required UserModel user}) {
-    return Container(
-        height: 650,
-        width: 250,
-        decoration: BoxDecoration(
-            image: DecorationImage(
-                image: NetworkImage(user.profilePicture!), fit: BoxFit.cover),
-            borderRadius: const BorderRadius.all(Radius.circular(15))),
-        child: Container(
-          decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(15)),
-              gradient: LinearGradient(
-                begin: Alignment.center,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black87,
-                  Colors.black,
-                ],
-              )),
+    return CachedNetworkImage(
+      imageUrl: user.profilePicture!,
+      imageBuilder: (context, imageProvider) => Container(
+          height: 650,
+          width: 250,
+          decoration: BoxDecoration(
+              image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+              borderRadius: const BorderRadius.all(Radius.circular(15))),
           child: Container(
-            margin: const EdgeInsets.only(bottom: 100, left: 25),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${user.name!} 23',
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 10,
-                          width: 10,
-                          decoration: const BoxDecoration(
-                              color: Colors.green, shape: BoxShape.circle),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.only(left: 10),
-                          child: Text(
-                            "En linea",
-                            style: TextStyle(fontSize: 18, color: Colors.white),
-                          ),
-                        )
-                      ],
-                    ),
-                    SizedBox(
-                      height: 30,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => DetailsUser(
-                                        user: user,
-                                      )));
-                        },
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.white,
-                            shape: const CircleBorder()),
-                        child: const Icon(
-                          Icons.upgrade,
-                          color: Colors.pinkAccent,
-                          size: 28,
-                        ),
-                      ),
-                    )
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.all(Radius.circular(15)),
+                gradient: LinearGradient(
+                  begin: Alignment.center,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black87,
+                    Colors.black,
                   ],
-                )
-              ],
+                )),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 100, left: 25),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${user.name!} 23',
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            height: 10,
+                            width: 10,
+                            decoration: const BoxDecoration(
+                                color: Colors.green, shape: BoxShape.circle),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.only(left: 10),
+                            child: Text(
+                              "En linea",
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(
+                        height: 30,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => DetailsUser(
+                                          user: user,
+                                        )));
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: const CircleBorder()),
+                          child: const Icon(
+                            Icons.upgrade,
+                            color: Colors.pinkAccent,
+                            size: 28,
+                          ),
+                        ),
+                      )
+                    ],
+                  )
+                ],
+              ),
             ),
-          ),
-        ));
+          )),
+      placeholder: (context, url) => CircularProgressIndicator(),
+      errorWidget: (context, url, error) => Icon(Icons.error),
+    );
+
+    ;
   }
 }

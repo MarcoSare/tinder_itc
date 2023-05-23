@@ -34,11 +34,12 @@ class UserModel {
       id: map['id'],
       name: map['name'],
       email: map['email'],
-      pass: map['pass'],
       profilePicture: map['profile_picture'],
       carrer: map['carrer'],
       semester: map['semester'],
       aboutMe: map['aboutMe'],
+      birthdate: map['birthdate'],
+      gender: map['gender'],
       interests: List<String?>.from(map['interests']),
     );
   }
