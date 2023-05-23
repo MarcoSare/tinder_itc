@@ -94,7 +94,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                               duration: const Duration(seconds: 1),
                               curve: Curves.decelerate);
                           if (_pageIndex == 2) {
-                            AppPreferences.firstTimeOpen=false;
                             Navigator.pushNamed(context, '/login');
                           }
                         },

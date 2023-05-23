@@ -10,6 +10,8 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/screens/register_pages.dart';
 import 'package:tinder_itc/widgets/alert_widget.dart';
+import 'package:tinder_itc/widgets/date_picker_widget.dart';
+import 'package:tinder_itc/widgets/gender_selector_widget.dart';
 import 'package:tinder_itc/widgets/multi_select_chip_widget.dart';
 import 'package:tinder_itc/widgets/text_email_widget.dart';
 import 'package:tinder_itc/widgets/text_form_widget.dart';
@@ -42,6 +44,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       250,
       5);
   MultiSelectChipWidget? multiSelectInter;
+  DatePickerWidget birthdatePicker = DatePickerWidget(msgError: 'Selecciona una fecha porfavor...',);
+  GenderSelectorWidget genderSelector = GenderSelectorWidget();
+
   late AlertWidget alertWidget;
   FirebaseAuth _auth = FirebaseAuth.instance;
   User? currentUser;
@@ -87,6 +92,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       case 1:
         return RegisterPage2(
           txtDescripcion: txtDescripcion,
+          birthdatePicker: birthdatePicker,
+          genderSelector: genderSelector,
         );
       case 2:
         return RegisterPage3(
@@ -121,12 +128,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         break;
 
       case 1:
-        if (txtDescripcion.formKey.currentState!.validate()) {
+        if (txtDescripcion.formKey.currentState!.validate() && birthdatePicker.formKey.currentState!.validate()) {
           print(txtDescripcion.controlador +
               ' ' +
               RegisterPage2.selectedCareer.toString() +
               ' ' +
-              RegisterPage2.selectedSemester.toString());
+              RegisterPage2.selectedSemester.toString()+
+              ' '+
+              birthdatePicker.date.toString()+
+              ' '+
+              genderSelector.gender.toString());
           _index.value++;
         }
         break;
@@ -269,6 +280,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
           email: textEmail.controlador,
           carrer: RegisterPage2.selectedCareer.toString(),
           semester: int.parse(RegisterPage2.selectedSemester.toString()),
+          birthdate: birthdatePicker.date,
+          gender: genderSelector.gender ? 'female': 'male',
           aboutMe: txtDescripcion.controlador,
           interests: multiSelectInter?.interestsList,
           profilePicture: urlImg);
@@ -302,6 +315,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         semester: int.parse(RegisterPage2.selectedSemester.toString()),
         aboutMe: txtDescripcion.controlador,
         interests: multiSelectInter?.interestsList,
+        birthdate: birthdatePicker.date,
+        gender:genderSelector.gender ? 'female': 'male',
         profilePicture: currentUser!.photoURL
       );
       final userJSON = user.toJson();

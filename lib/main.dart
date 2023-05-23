@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:tinder_itc/app_preferences.dart';
 import 'package:tinder_itc/provider/user_provider.dart';
 import 'package:tinder_itc/routes.dart';
+import 'package:tinder_itc/screens/dashboard_screen.dart';
 import 'package:tinder_itc/screens/login.dart';
 import 'package:tinder_itc/screens/on_boarding_screen.dart';
 import 'package:tinder_itc/settings/styles_settings.dart';
@@ -76,7 +77,19 @@ class _MyAppState extends State<MyApp> {
         routes: getApplicationRoutes(),
         title: 'Flutter Demo',
         theme: StylesSettings.darkTheme,
-        home: AppPreferences.firstTimeOpen ? const OnBoardingScreen() : Login(),
+        home: Builder(
+          builder: (context){
+            if(AppPreferences.firstTimeOpen==true){
+              return const OnBoardingScreen();
+            }else if(UserPreferencesDev.user!='["no_user"]'){
+              final user = Provider.of<UserProvider>(context);
+              user.setUserData(UserPreferencesDev.getUserObject());
+              return const DashBoardScreen();
+            }else{
+              return Login();
+            }
+          },
+        )
       ),
     );
   }
