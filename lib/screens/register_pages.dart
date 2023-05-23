@@ -141,9 +141,12 @@ class _RegisterPage1State extends State<RegisterPage1> {
 }
 
 class RegisterPage2 extends StatefulWidget {
-  RegisterPage2({super.key, this.txtDescripcion, this.onChangeCareer});
+  RegisterPage2({super.key, this.txtDescripcion, this.onChangeCareer, this.birthdatePicker, this.genderSelector});
 
   Widget? txtDescripcion;
+  Widget? birthdatePicker;
+  Widget? genderSelector;
+
   Function(String)? onChangeCareer;
 
   static var selectedCareer;
@@ -187,6 +190,22 @@ class _RegisterPage2State extends State<RegisterPage2> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text(
+            'Genero',
+            style: TextStyle(fontSize: 20),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: widget.genderSelector!,
+          ),
+          const Text(
+            'Fecha de nacimiento',
+            style: TextStyle(fontSize: 20),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: widget.birthdatePicker!,
+          ),
           const Text(
             'Elige tu carrera:',
             style: TextStyle(fontSize: 20),

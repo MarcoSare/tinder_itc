@@ -9,7 +9,6 @@ import 'package:tinder_itc/app_preferences.dart';
 import 'package:tinder_itc/firebase/email_auth.dart';
 import 'package:tinder_itc/firebase/github_auth.dart';
 import 'package:tinder_itc/firebase/google_auth.dart';
-import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/provider/user_provider.dart';
 import 'package:tinder_itc/responsive.dart';
 import 'package:tinder_itc/user_preferences_dev.dart';
@@ -28,6 +27,13 @@ class _LoginState extends State<Login> {
 
   late AlertWidget al;
   DateTime? currenBackTime;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    AppPreferences.firstTimeOpen=false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +97,7 @@ class _LoginState extends State<Login> {
             //redireccionar al dashboard
             AlertWidget.showMessage(context, 'Acceso exitoso', 'Has ingresado a tu cuenta');
             userProvider.setUserData(UserPreferencesDev.getUserObject());
-            
+            Navigator.pushNamed(context, '/home');
           }else if(value=='logged-without-info'){
             //redireccionar al register_screen - RegisterScreen debe 
             AlertWidget.showMessageWithActions(context, 'Creación exitoso', 'Tu cuenta de google ha sido creada correctamente, procede a completar el registro porfavor', [btnRedirectReg]);
@@ -115,6 +121,7 @@ class _LoginState extends State<Login> {
         _githubAuth.signInWithGitHub(context).then((value) {
           if(value=='logged-succesful'){
             AlertWidget.showMessage(context, 'Inicio de sesión exitoso', 'Continua con tu experiencia...');
+            Navigator.pushNamed(context, '/home');
             userProvider.setUserData(UserPreferencesDev.getUserObject());
           }else if(value=='logged-without-info'){
             AlertWidget.showMessageWithActions(context, 'Registro exitoso', 'Tu cuenta  ha sido creada correctamente', [btnRedirectReg]);
@@ -162,6 +169,7 @@ class _LoginState extends State<Login> {
 
               default:
                 userProvider.setUserData(UserPreferencesDev.getUserObject());
+                Navigator.pushNamed(context, '/home');
             }
           });
         }
@@ -232,13 +240,6 @@ class _LoginState extends State<Login> {
             ),
             divider,
             social,
-            ElevatedButton(onPressed: (){
-              Navigator.pushNamed(context, '/update_profile');
-            }, child: Text('update profile')),
-            ElevatedButton(onPressed: (){ 
-              UserModel model = userProvider.getUserData() ?? UserModel();
-              print(model.toJson());
-            }, child: Text('USER Pefs'))
           ],
         ),
       );

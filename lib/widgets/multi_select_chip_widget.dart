@@ -35,7 +35,7 @@ class _MultiSelectChipWidgetState extends State<MultiSelectChipWidget> {
           });
         },
         title: const Text('Selecciona tus intereses'),
-        initialValue: widget.initialValues,
+        initialValue: widget.initialValues ?? [''],
       ),
     );
   }

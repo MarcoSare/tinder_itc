@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -199,14 +198,6 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     );
 
     final btnUpdate = ElevatedButton(onPressed: () async{
-     /*  print('''$_path  
-      ${interestSelector!.interestsList.isEmpty ? interestSelector!.initialValues : interestSelector!.interestsList }  
-      ${txtNombre.controlador}
-      ${txtDesc.controlador}
-      ${selectedCareer ?? first}
-      ${selectedSemester ?? firstSemester}
-      ${_path ?? widget.image}
-      '''); */
       await updateUser(userProvider);
     },
     child: const Text('Actualizar perfil'));
