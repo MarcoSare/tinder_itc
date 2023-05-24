@@ -1,11 +1,14 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:tinder_itc/app_preferences.dart';
+import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/provider/user_provider.dart';
 import 'package:tinder_itc/routes.dart';
 import 'package:tinder_itc/screens/dashboard_screen.dart';
+import 'package:tinder_itc/screens/details_user.dart';
 import 'package:tinder_itc/screens/login.dart';
 import 'package:tinder_itc/screens/on_boarding_screen.dart';
 import 'package:tinder_itc/settings/styles_settings.dart';
@@ -24,7 +27,15 @@ Future main() async {
   await UserPreferencesDev.preferences();
   await AppPreferences.preferences();
   FirebaseMessaging.onBackgroundMessage(backgroundMessageHandler);
-  runApp(const MyApp());
+  final userModel = await UserPreferencesDev.getUserObject();
+
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider<UserProvider>(
+          create: (_) => UserProvider()..setUserData(userModel)),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -35,6 +46,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late UserModel userModel;
   @override
   void initState() {
     init();
@@ -65,34 +77,67 @@ class _MyAppState extends State<MyApp> {
     // Resto del código de tu aplicación
   }
 
-// Callback para manejar notificaciones en segundo plano
+  initData() async {
+    userModel = await UserPreferencesDev.getUserObject();
+  }
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    final userProvider = Provider.of<UserProvider>(context);
+    return FutureBuilder(
+        future: initData(),
+        builder: (context, AsyncSnapshot<dynamic> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.none:
+            case ConnectionState.waiting:
+            case ConnectionState.active:
+              return const Center(
+                  child: Center(child: CircularProgressIndicator()));
+
+            case ConnectionState.done:
+              return GetMaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  routes: getApplicationRoutes(),
+                  title: 'Flutter Demo',
+                  theme: StylesSettings.darkTheme,
+                  home: Builder(
+                    builder: (context) {
+                      if (AppPreferences.firstTimeOpen == true) {
+                        return const OnBoardingScreen();
+                      } else if (UserPreferencesDev.user != '["no_user"]') {
+                        return DashBoardScreen();
+                      } else {
+                        return Login();
+                      }
+                    },
+                  ));
+          }
+        });
+  }
+
+  /*
+  MultiProvider(
       providers: [ChangeNotifierProvider(create: (_) => UserProvider())],
       child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        routes: getApplicationRoutes(),
-        title: 'Flutter Demo',
-        theme: StylesSettings.darkTheme,
-        home: Builder(
-          builder: (context){
-            if(AppPreferences.firstTimeOpen==true){
-              return const OnBoardingScreen();
-            }else if(UserPreferencesDev.user!='["no_user"]'){
-              final user = Provider.of<UserProvider>(context);
-              user.setUserData(UserPreferencesDev.getUserObject());
-              return const DashBoardScreen();
-            }else{
-              return Login();
-            }
-          },
-        )
-      ),
+          debugShowCheckedModeBanner: false,
+          routes: getApplicationRoutes(),
+          title: 'Flutter Demo',
+          theme: StylesSettings.darkTheme,
+          home: Builder(
+            builder: (context) {
+              if (AppPreferences.firstTimeOpen == true) {
+                return const OnBoardingScreen();
+              } else if (UserPreferencesDev.user != '["no_user"]') {
+                final user = Provider.of<UserProvider>(context);
+                user.setUserData(UserPreferencesDev.getUserObject());
+                return const DashBoardScreen();
+              } else {
+                return Login();
+              }
+            },
+          )),
     );
-  }
+  */
 
   Future getDeviceToken() async {
     FirebaseMessaging _firebaseMessage = FirebaseMessaging.instance;

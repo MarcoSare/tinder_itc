@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +8,7 @@ import 'package:tinder_itc/firebase/email_auth.dart';
 import 'package:tinder_itc/firebase/github_auth.dart';
 import 'package:tinder_itc/firebase/google_auth.dart';
 import 'package:tinder_itc/screens/home_screen.dart';
+import 'package:tinder_itc/screens/likes_home_screen.dart';
 import 'package:tinder_itc/screens/match_screen.dart';
 import 'package:tinder_itc/user_preferences_dev.dart';
 import 'package:tinder_itc/widgets/alert_widget.dart';
@@ -21,11 +23,12 @@ class DashBoardScreen extends StatefulWidget {
 }
 
 class _DashBoardScreenState extends State<DashBoardScreen> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   DateTime? currenBackTime;
 
   final List<Widget> _widgetOptions = <Widget>[
     const MatchScreen(),
+    const LikeHomeScreen(),
     const HomeScreen(),
     const Text("profile")
   ];
@@ -40,20 +43,18 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
   Widget build(BuildContext context) {
     List<Widget> logoutActions = [
       ElevatedButton(
-        onPressed: (){
-          Navigator.pop(context);
-        }, 
-        child: const Text('volver')
-      ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('volver')),
       ElevatedButton(
-        onPressed: (){
-         signout();
-         UserPreferencesDev.clearPrefs();
-         Navigator.pushNamed(context, '/login');
-        }, 
-        child: const Text('cerrar sesión')
-      ),
-    ]; 
+          onPressed: () {
+            signout();
+            UserPreferencesDev.clearPrefs();
+            Navigator.pushNamed(context, '/login');
+          },
+          child: const Text('cerrar sesión')),
+    ];
 
     return WillPopScope(
       onWillPop: onWillPop,
@@ -75,11 +76,19 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               ],
             ),
             actions: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.notifications)),
-              IconButton(onPressed: () {}, icon: const Icon(Icons.tune)),
-              IconButton(onPressed: () {
-                AlertWidget.showMessageWithActions(context, 'Cerrando sesión', '¿Estas seguro?', logoutActions);
-              }, icon: const Icon(Icons.exit_to_app))
+              IconButton(
+                  onPressed: () {}, icon: const Icon(Icons.notifications)),
+              IconButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/filter_settings');
+                  },
+                  icon: const Icon(Icons.tune)),
+              IconButton(
+                  onPressed: () {
+                    AlertWidget.showMessageWithActions(context,
+                        'Cerrando sesión', '¿Estas seguro?', logoutActions);
+                  },
+                  icon: const Icon(Icons.exit_to_app))
             ],
           ),
           body: _widgetOptions.elementAt(_selectedIndex),
@@ -105,11 +114,20 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.manage_search,
+                      icon: Icon(Icons.favorite,
                           color: _selectedIndex == 1 ? Colors.red : null),
                       onPressed: () {
                         setState(() {
                           _selectedIndex = 1;
+                        });
+                      },
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.manage_search,
+                          color: _selectedIndex == 2 ? Colors.red : null),
+                      onPressed: () {
+                        setState(() {
+                          _selectedIndex = 2;
                         });
                       },
                     ),
@@ -122,9 +140,9 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
 
   Widget getProfile(BuildContext context) {
     return SizedBox(
-      height: 60,
-      width: 70,
-      child: ElevatedButton(
+        height: 60,
+        width: 70,
+        child: ElevatedButton(
           style: ElevatedButton.styleFrom(
               elevation: 0.0,
               backgroundColor: Colors.transparent,
@@ -138,48 +156,49 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             backgroundColor: Color.fromRGBO(23, 32, 42, 1),
             radius: 60,
             child: Selector<UserProvider, String>(
-              selector: (_ ,provider) => provider.user!.profilePicture!,
-              builder: (context, profilePicture, child){
-                return CircleAvatar(
-                backgroundColor: Colors.transparent,
-                radius: 60,
-                backgroundImage: NetworkImage(profilePicture),
-              );
-              }),
-            ),
-          ));
+                selector: (_, provider) => provider.user!.profilePicture!,
+                builder: (context, profilePicture, child) {
+                  return CircleAvatar(
+                    backgroundColor: Colors.transparent,
+                    radius: 60,
+                    backgroundImage: CachedNetworkImageProvider(profilePicture),
+                  );
+                }),
+          ),
+        ));
   }
 
   void signout() {
     GithubAuth _git = GithubAuth();
     GoogleAuth _google = GoogleAuth();
     EmailAuth _email = EmailAuth();
-    final providerId = FirebaseAuth.instance.currentUser!.providerData[0].providerId;
-    switch (providerId){
+    final providerId =
+        FirebaseAuth.instance.currentUser!.providerData[0].providerId;
+    switch (providerId) {
       case 'github.com':
         _git.signOutFromGitHub();
-      break;
+        break;
 
       case 'google.com':
         _google.signOutFromGoogle();
-      break;
+        break;
 
       case 'password':
         _email.signOutFromEmail();
-      break;
+        break;
     }
-    
   }
 
   Future<bool> onWillPop() async {
-      DateTime now = DateTime.now();
-      if(currenBackTime == null || now.difference(currenBackTime!)> const Duration(seconds: 15)){
-        currenBackTime = now;
-        Fluttertoast.showToast(msg: '¿Seguro que quieres salir?');
-        return false;
-      }else{
-        SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-        return false;
-      }
+    DateTime now = DateTime.now();
+    if (currenBackTime == null ||
+        now.difference(currenBackTime!) > const Duration(seconds: 15)) {
+      currenBackTime = now;
+      Fluttertoast.showToast(msg: '¿Seguro que quieres salir?');
+      return false;
+    } else {
+      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+      return false;
     }
+  }
 }

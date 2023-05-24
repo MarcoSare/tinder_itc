@@ -4,8 +4,7 @@ import 'package:tinder_itc/user_preferences_dev.dart';
 
 import '../models/user_model.dart';
 
-class Database{
-
+class Database {
   static Future<UserModel> getUserData(String uid) async {
     final docUser = FirebaseFirestore.instance.collection('usuarios').doc(uid);
     final doc = await docUser.get();
@@ -14,6 +13,7 @@ class Database{
 
   static Future saveUserPrefs(UserCredential creds) async {
     final userData = await getUserData(creds.user!.uid);
-    UserPreferencesDev.user=UserModel.toMap(userData);
+    userData.id = creds.user!.uid;
+    UserPreferencesDev.user = UserModel.toMap(userData);
   }
 }

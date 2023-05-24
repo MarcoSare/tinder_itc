@@ -4,6 +4,7 @@ class StylesSettings {
   static final lightTheme = ThemeData(
       fontFamily: 'Mukta',
       useMaterial3: true,
+      primaryColorDark: const Color(0xFF1F1A1D),
       inputDecorationTheme: InputDecorationTheme(
         enabledBorder: OutlineInputBorder(
             borderSide: const BorderSide(color: Color(0xFF1F1A1D)),
@@ -60,6 +61,7 @@ class StylesSettings {
   static final darkTheme = ThemeData(
     fontFamily: 'Mukta',
     useMaterial3: true,
+    primaryColorDark: const Color(0xFFEAE0E3),
     inputDecorationTheme: InputDecorationTheme(
       enabledBorder: OutlineInputBorder(
           borderSide: const BorderSide(color: Color(0xFFEAE0E3)),

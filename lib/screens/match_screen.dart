@@ -1,9 +1,14 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:swipeable_card_stack/swipeable_card_stack.dart';
+import 'package:tinder_itc/firebase/users_firebase.dart';
 import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/network/api_users.dart';
+import 'package:tinder_itc/provider/user_provider.dart';
 import 'package:tinder_itc/screens/details_user.dart';
 
 class MatchScreen extends StatefulWidget {
@@ -17,15 +22,18 @@ class _MatchScreenState extends State<MatchScreen> {
   bool like = false;
   bool nope = false;
   int counter = 0;
+  late String idTo;
   final SwipeableCardSectionController _cardController =
       SwipeableCardSectionController();
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
+    final userProvider = Provider.of<UserProvider>(context);
+    String idFrom = userProvider.user!.id!;
     return Scaffold(
       body: Center(
         child: FutureBuilder(
-          future: ApiUsers.getAllUsers(),
+          future: ApiUsers.getAllUsers(idFrom),
           builder: (context, AsyncSnapshot<List<UserModel>> snapshot) {
             if (snapshot.hasData) {
               return Stack(children: [
@@ -51,6 +59,7 @@ class _MatchScreenState extends State<MatchScreen> {
                           if (counter < snapshot.data!.length - 3) {
                             _cardController.addItem(
                                 getCard(user: snapshot.data![index + 3]));
+                            idTo = snapshot.data![counter].id!;
                             counter++;
                             print(counter);
                           }
@@ -65,14 +74,19 @@ class _MatchScreenState extends State<MatchScreen> {
                               });
                             });
                           } else if (dir == Direction.right) {
-                            setState(() {
-                              like = true;
-                            });
-                            Future.delayed(Duration(milliseconds: 1000), () {
-                              setState(() {
-                                like = false;
-                              });
-                            });
+                            UsersFireBase.like(idFrom: idFrom, idTo: idTo).then(
+                              (value) {
+                                setState(() {
+                                  like = true;
+                                });
+                                Future.delayed(Duration(milliseconds: 1000),
+                                    () {
+                                  setState(() {
+                                    like = false;
+                                  });
+                                });
+                              },
+                            );
                           }
                         },
 
@@ -175,6 +189,7 @@ class _MatchScreenState extends State<MatchScreen> {
                             child: ElevatedButton(
                               onPressed: () {
                                 _cardController.triggerSwipeRight();
+                                //
                               },
                               style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
@@ -195,7 +210,35 @@ class _MatchScreenState extends State<MatchScreen> {
             } else if (snapshot.hasError) {
               return const Text("error");
             } else {
-              return const Text("Loading");
+              return SizedBox(
+                height: 200,
+                width: 200,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    LoadingAnimationWidget.beat(color: Colors.white, size: 120),
+                    Positioned(
+                      top: 50,
+                      bottom: 50,
+                      child: CircleAvatar(
+                        backgroundColor: const Color.fromRGBO(23, 32, 42, 1),
+                        radius: 50,
+                        child: Selector<UserProvider, String>(
+                            selector: (_, provider) =>
+                                provider.user!.profilePicture!,
+                            builder: (context, profilePicture, child) {
+                              return CircleAvatar(
+                                backgroundColor: Colors.transparent,
+                                radius: 50,
+                                backgroundImage:
+                                    CachedNetworkImageProvider(profilePicture),
+                              );
+                            }),
+                      ),
+                    )
+                  ],
+                ),
+              );
             }
           },
         ),
@@ -306,8 +349,32 @@ Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               ),
             ),
           )),
-      placeholder: (context, url) => CircularProgressIndicator(),
-      errorWidget: (context, url, error) => Icon(Icons.error),
+      placeholder: (context, url) => SizedBox(
+        width: 350,
+        height: 650,
+        child: Shimmer.fromColors(
+            baseColor: Colors.grey.withOpacity(0.25),
+            highlightColor: Colors.white.withOpacity(0.6),
+            child: Container(
+              width: 250.0,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15), color: Colors.grey),
+            )),
+      ),
+      errorWidget: (context, url, error) => SizedBox(
+        width: 350,
+        height: 650,
+        child: Shimmer.fromColors(
+            baseColor: Colors.grey.withOpacity(0.25),
+            highlightColor: Colors.white.withOpacity(0.6),
+            child: Container(
+              width: 250.0,
+              height: double.infinity,
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15), color: Colors.grey),
+            )),
+      ),
     );
 
     ;

@@ -8,19 +8,21 @@ import 'package:path_provider/path_provider.dart';
 import 'package:tinder_itc/models/user_model.dart';
 
 class ApiUsers {
-  static Future<List<UserModel>> getAllUsers() async {
+  static Future<List<UserModel>> getAllUsers(String idUser) async {
+    print("inicio");
     String fileName = "userData.json";
     final Directory tempDir = await getTemporaryDirectory();
     File file = new File(tempDir.path + "/" + fileName);
     final dio = Dio();
     try {
       final response = await dio.get(
-          'https://us-central1-tinder-itc.cloudfunctions.net/app/usuarios');
+          'https://us-central1-tinder-itc.cloudfunctions.net/app/usuarios/${idUser}');
       final data = response.data;
       file.writeAsStringSync(jsonEncode(data),
           flush: true, mode: FileMode.write);
       final listJSON = data as List;
       if (response.statusCode == 200) {
+        print("fin");
         return listJSON.map((map) => UserModel.fromMap(map)).toList();
       }
       return List.empty();
@@ -29,7 +31,10 @@ class ApiUsers {
       var jsonData = file.readAsStringSync();
       final data = jsonDecode(jsonData);
       final listJSON = data as List;
-      return listJSON.map((map) => UserModel.fromMap(map)).toList();
+      print("fin");
+      await Future.delayed(Duration(seconds: 1), () {});
+      final users = listJSON.map((map) => UserModel.fromMap(map)).toList();
+      return users;
     }
   }
 }
