@@ -229,7 +229,7 @@ Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         width: 250,
         decoration: BoxDecoration(
             image: DecorationImage(
-                image: NetworkImage(user.profilePicture!), fit: BoxFit.cover),
+                image: NetworkImage(user.profilePicture ?? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'), fit: BoxFit.cover),
             borderRadius: const BorderRadius.all(Radius.circular(15))),
         child: Container(
           decoration: const BoxDecoration(

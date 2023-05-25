@@ -203,17 +203,17 @@ class Onboard {
 final List<Onboard> demoData = [
   Onboard(
       image: "assets/images/boarding/boarding_1.png",
-      title: "WELCOME TO OUR COMMUNITY",
+      title: "Bienvenido a Tinder ITC",
       description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"),
+          "Te damos una cordial bienvenida a Tinder ITC, un lugar en el cual puedes establecer conexiones con más añumnos del ITC"),
   Onboard(
       image: "assets/images/boarding/boarding_2.png",
-      title: "enjoy the experience",
+      title: "Disfruta tu experiencia",
       description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua"),
+          "Diseñamos esta aplicación pensando siempre en el bienestar y comodidad de los usuarios que buscan establecer nuevas relaciones dentro del instituto"),
   Onboard(
       image: "assets/images/boarding/boarding_3.png",
-      title: "WELCOME TO OUR COMMUNITY x3",
+      title: "Exclusividad para los alumnos",
       description:
-          "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua")
+          "Dentro de esta aplicación solo encontrarás estudiantes exclusivamente del TecNM en Celaya, igual y encuentras tu romance universitario...")
 ];

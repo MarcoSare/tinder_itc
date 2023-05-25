@@ -280,7 +280,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           email: textEmail.controlador,
           carrer: RegisterPage2.selectedCareer.toString(),
           semester: int.parse(RegisterPage2.selectedSemester.toString()),
-          birthdate: birthdatePicker.date,
+          birthdate: birthdatePicker.date.toString(),
           gender: genderSelector.gender ? 'female': 'male',
           aboutMe: txtDescripcion.controlador,
           interests: multiSelectInter?.interestsList,
@@ -315,7 +315,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         semester: int.parse(RegisterPage2.selectedSemester.toString()),
         aboutMe: txtDescripcion.controlador,
         interests: multiSelectInter?.interestsList,
-        birthdate: birthdatePicker.date,
+        birthdate: birthdatePicker.date.toString(),
         gender:genderSelector.gender ? 'female': 'male',
         profilePicture: currentUser!.photoURL
       );

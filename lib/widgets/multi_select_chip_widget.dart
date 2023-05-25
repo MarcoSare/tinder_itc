@@ -17,6 +17,15 @@ class MultiSelectChipWidget extends StatefulWidget {
 class _MultiSelectChipWidgetState extends State<MultiSelectChipWidget> {
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if(widget.initialValues != null){
+      widget.interestsList.addAll(widget.initialValues);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return  Form(
       key: widget.formKey,
@@ -35,7 +44,7 @@ class _MultiSelectChipWidgetState extends State<MultiSelectChipWidget> {
           });
         },
         title: const Text('Selecciona tus intereses'),
-        initialValue: widget.initialValues ?? [''],
+        initialValue: widget.interestsList
       ),
     );
   }
