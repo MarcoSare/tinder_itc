@@ -23,20 +23,29 @@ class DashBoardScreen extends StatefulWidget {
 }
 
 class _DashBoardScreenState extends State<DashBoardScreen> {
-  int _selectedIndex = 1;
+  int _selectedIndex = 0;
   DateTime? currenBackTime;
-
-  final List<Widget> _widgetOptions = <Widget>[
-    const MatchScreen(),
-    const LikeHomeScreen(),
-    const HomeScreen(),
-    const Text("profile")
-  ];
-
-  void _onItemTapped(int index) {
+  late Widget matchScreen;
+  late List<Widget> _widgetOptions;
+  int conunter = 0;
+  final GlobalKey<RefreshIndicatorState> _screen0Key =
+      GlobalKey<RefreshIndicatorState>();
+  void reloadScreen0() {
     setState(() {
-      _selectedIndex = index;
+      _screen0Key.currentState?.show();
     });
+  }
+
+  @override
+  void initState() {
+    matchScreen = const MatchScreen();
+    _widgetOptions = <Widget>[
+      const MatchScreen(),
+      const LikeHomeScreen(),
+      const HomeScreen(),
+      const Text("profile")
+    ];
+    super.initState();
   }
 
   @override
@@ -72,7 +81,11 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                         fit: BoxFit.fill),
                   ),
                 ),
-                const Text('Tinder ITC')
+                const Text('Tinder ITC'),
+                Text(
+                  conunter.toString(),
+                  style: const TextStyle(color: Colors.transparent),
+                )
               ],
             ),
             actions: [
@@ -91,7 +104,10 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                   icon: const Icon(Icons.exit_to_app))
             ],
           ),
-          body: _widgetOptions.elementAt(_selectedIndex),
+          body: IndexedStack(
+            index: _selectedIndex,
+            children: _widgetOptions,
+          ),
           bottomNavigationBar: BottomAppBar(
             child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 10.0),

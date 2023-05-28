@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:swipe_cards/swipe_cards.dart';
 import 'package:swipeable_card_stack/swipeable_card_stack.dart';
+import 'package:tinder_itc/app_preferences.dart';
 import 'package:tinder_itc/firebase/users_firebase.dart';
 import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/network/api_users.dart';
+import 'package:tinder_itc/provider/filters_provider.dart';
 import 'package:tinder_itc/provider/user_provider.dart';
 import 'package:tinder_itc/screens/details_user.dart';
 
@@ -21,258 +24,270 @@ class MatchScreen extends StatefulWidget {
 class _MatchScreenState extends State<MatchScreen> {
   bool like = false;
   bool nope = false;
-  int counter = 0;
+  int counter = 0, counter2 = 0;
+  int counterLike = 0;
+  bool isEnd = false;
   late String idTo;
+  List<UserModel> listUsers = List.empty(growable: true);
   final SwipeableCardSectionController _cardController =
       SwipeableCardSectionController();
+
+  List<SwipeItem> _swipeItems = <SwipeItem>[];
+  MatchEngine? _matchEngine;
+
+  initData(String idFrom) async {
+    List<UserModel> response = await ApiUsers.getAllUsers(idFrom);
+    print("aaaa" + AppPreferences.token);
+    for (UserModel u in response) {
+      _swipeItems.add(
+        SwipeItem(
+            content: u,
+            likeAction: () {
+              UsersFireBase.like(idFrom: idFrom, toUser: u).then((value) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  elevation: 6.0,
+                  behavior: SnackBarBehavior.floating,
+                  content: const Text("LIKE"),
+                  duration: const Duration(milliseconds: 500),
+                ));
+              });
+            },
+            nopeAction: () {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                elevation: 6.0,
+                behavior: SnackBarBehavior.floating,
+                content: Text("NOPE"),
+                duration: Duration(milliseconds: 500),
+              ));
+            }),
+      );
+    }
+    _matchEngine = MatchEngine(swipeItems: _swipeItems);
+  }
+
   @override
   Widget build(BuildContext context) {
-    double height = MediaQuery.of(context).size.height;
     final userProvider = Provider.of<UserProvider>(context);
-    String idFrom = userProvider.user!.id!;
+    double height = MediaQuery.of(context).size.height;
+    String? idFrom = userProvider.user!.id!;
     return Scaffold(
-      body: Center(
-        child: FutureBuilder(
-          future: ApiUsers.getAllUsers(idFrom),
-          builder: (context, AsyncSnapshot<List<UserModel>> snapshot) {
-            if (snapshot.hasData) {
-              return Stack(children: [
-                SizedBox(
-                  //padding: EdgeInsets.all(0),
-                  //color: Colors.red,
-                  height: height * 0.8,
-                  child: Column(
-                    children: [
-                      SwipeableCardsSection(
-                        cardHeightTopMul: 0.95,
-                        cardHeightMiddleMul: 0.7,
-                        cardWidthTopMul: 0.95,
-                        cardWidthMiddleMul: 0.9,
-                        cardController: _cardController,
-                        context: context,
-                        items: [
-                          for (UserModel userModel in snapshot.data!)
-                            getCard(user: userModel)
-                        ],
-
-                        onCardSwiped: (dir, index, widget) {
-                          if (counter < snapshot.data!.length - 3) {
-                            _cardController.addItem(
-                                getCard(user: snapshot.data![index + 3]));
-                            idTo = snapshot.data![counter].id!;
-                            counter++;
-                            print(counter);
-                          }
-
-                          if (dir == Direction.left) {
-                            setState(() {
-                              nope = true;
-                            });
-                            Future.delayed(Duration(milliseconds: 1000), () {
-                              setState(() {
-                                nope = false;
-                              });
-                            });
-                          } else if (dir == Direction.right) {
-                            UsersFireBase.like(idFrom: idFrom, idTo: idTo).then(
-                              (value) {
-                                setState(() {
-                                  like = true;
-                                });
-                                Future.delayed(Duration(milliseconds: 1000),
-                                    () {
-                                  setState(() {
-                                    like = false;
-                                  });
-                                });
-                              },
-                            );
-                          }
-                        },
-
-                        //
-                        enableSwipeUp: true,
-                        enableSwipeDown: true,
+        body: Center(
+            child: FutureBuilder(
+                future: initData(idFrom),
+                builder: (context, AsyncSnapshot<dynamic> snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    return Stack(children: [
+                      SizedBox(
+                        height: height * 0.8,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            !isEnd
+                                ? Container(
+                                    padding: const EdgeInsets.all(10),
+                                    height: height * 0.79,
+                                    width: double.infinity,
+                                    child: SwipeCards(
+                                      matchEngine: _matchEngine!,
+                                      itemBuilder:
+                                          (BuildContext context, int index) {
+                                        return getCard(
+                                            _swipeItems[index].content);
+                                      },
+                                      onStackFinished: () {
+                                        setState(() {
+                                          isEnd = true;
+                                        });
+                                      },
+                                    ),
+                                  )
+                                : Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: const [
+                                        Padding(
+                                          padding: EdgeInsets.all(3.0),
+                                          child: Text(
+                                            "No se encontraron personas",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        ),
+                                        Padding(
+                                          padding: EdgeInsets.all(5.0),
+                                          child: Text(
+                                            "Revisa tus ajustes de búsqueda para encontar personas",
+                                            style: TextStyle(fontSize: 16),
+                                            textAlign: TextAlign.center,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-                like
-                    ? Positioned(
-                        left: 30,
-                        top: 150,
-                        child: FadeInUp(
-                          delay: const Duration(microseconds: 1000),
-                          child: Transform.rotate(
-                            angle: 345,
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  border:
-                                      Border.all(width: 5, color: Colors.red),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(15))),
-                              child: const Text(
-                                "LIKE",
-                                style:
-                                    TextStyle(fontSize: 32, color: Colors.red),
-                              ),
+                      like
+                          ? Positioned(
+                              left: 30,
+                              top: 150,
+                              child: FadeInUp(
+                                delay: const Duration(microseconds: 1000),
+                                child: Transform.rotate(
+                                  angle: 345,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            width: 5, color: Colors.red),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(15))),
+                                    child: const Text(
+                                      "LIKE",
+                                      style: TextStyle(
+                                          fontSize: 32, color: Colors.red),
+                                    ),
+                                  ),
+                                ),
+                              ))
+                          : const Text(""),
+                      nope
+                          ? Positioned(
+                              right: 30,
+                              top: 150,
+                              child: FadeInUp(
+                                delay: const Duration(microseconds: 1000),
+                                child: Transform.rotate(
+                                  angle: 345,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            width: 5, color: Colors.red),
+                                        borderRadius: const BorderRadius.all(
+                                            Radius.circular(15))),
+                                    child: const Text(
+                                      "NOPE",
+                                      style: TextStyle(
+                                          fontSize: 32, color: Colors.red),
+                                    ),
+                                  ),
+                                ),
+                              ))
+                          : const Text(""),
+                      Positioned(
+                          bottom: 0,
+                          left: 50,
+                          right: 50,
+                          child: Container(
+                            width: 250,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                SizedBox(
+                                  height: 100,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _matchEngine!.currentItem?.nope();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        shape: const CircleBorder()),
+                                    child: const Icon(
+                                      Icons.close,
+                                      color: Colors.red,
+                                      size: 32,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 100,
+                                  child: ElevatedButton(
+                                    onPressed: () {},
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        shape: const CircleBorder()),
+                                    child: const Icon(
+                                      Icons.star,
+                                      color: Colors.blue,
+                                      size: 32,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 100,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      _matchEngine!.currentItem?.like();
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.white,
+                                        shape: const CircleBorder()),
+                                    child: const Icon(
+                                      Icons.favorite,
+                                      color: Colors.pinkAccent,
+                                      size: 32,
+                                    ),
+                                  ),
+                                )
+                              ],
                             ),
-                          ),
-                        ))
-                    : const Text(""),
-                nope
-                    ? Positioned(
-                        right: 30,
-                        top: 150,
-                        child: FadeInUp(
-                          delay: const Duration(microseconds: 1000),
-                          child: Transform.rotate(
-                            angle: 345,
-                            child: Container(
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                  border:
-                                      Border.all(width: 5, color: Colors.red),
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(15))),
-                              child: const Text(
-                                "NOPE",
-                                style:
-                                    TextStyle(fontSize: 32, color: Colors.red),
-                              ),
-                            ),
-                          ),
-                        ))
-                    : const Text(""),
-                Positioned(
-                    bottom: 0,
-                    left: 50,
-                    right: 50,
-                    child: Container(
-                      width: 250,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          ))
+
+                      //other children
+                    ]);
+                  } else if (snapshot.hasError) {
+                    return const Text("error");
+                  } else {
+                    return SizedBox(
+                      height: 200,
+                      width: 200,
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
-                          SizedBox(
-                            height: 100,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _cardController.triggerSwipeLeft();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  shape: const CircleBorder()),
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.red,
-                                size: 32,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 100,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  shape: const CircleBorder()),
-                              child: const Icon(
-                                Icons.star,
-                                color: Colors.blue,
-                                size: 32,
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 100,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _cardController.triggerSwipeRight();
-                                //
-                              },
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.white,
-                                  shape: const CircleBorder()),
-                              child: const Icon(
-                                Icons.favorite,
-                                color: Colors.pinkAccent,
-                                size: 32,
-                              ),
+                          LoadingAnimationWidget.beat(
+                              color: Colors.white, size: 120),
+                          Positioned(
+                            top: 50,
+                            bottom: 50,
+                            child: CircleAvatar(
+                              backgroundColor:
+                                  const Color.fromRGBO(23, 32, 42, 1),
+                              radius: 50,
+                              child: Selector<UserProvider, String>(
+                                  selector: (_, provider) =>
+                                      provider.user!.profilePicture!,
+                                  builder: (context, profilePicture, child) {
+                                    return CircleAvatar(
+                                      backgroundColor: Colors.transparent,
+                                      radius: 50,
+                                      backgroundImage:
+                                          CachedNetworkImageProvider(
+                                              profilePicture),
+                                    );
+                                  }),
                             ),
                           )
                         ],
                       ),
-                    ))
-
-                //other children
-              ]);
-            } else if (snapshot.hasError) {
-              return const Text("error");
-            } else {
-              return SizedBox(
-                height: 200,
-                width: 200,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    LoadingAnimationWidget.beat(color: Colors.white, size: 120),
-                    Positioned(
-                      top: 50,
-                      bottom: 50,
-                      child: CircleAvatar(
-                        backgroundColor: const Color.fromRGBO(23, 32, 42, 1),
-                        radius: 50,
-                        child: Selector<UserProvider, String>(
-                            selector: (_, provider) =>
-                                provider.user!.profilePicture!,
-                            builder: (context, profilePicture, child) {
-                              return CircleAvatar(
-                                backgroundColor: Colors.transparent,
-                                radius: 50,
-                                backgroundImage:
-                                    CachedNetworkImageProvider(profilePicture),
-                              );
-                            }),
-                      ),
-                    )
-                  ],
-                ),
-              );
-            }
-          },
-        ),
-      ),
-    );
+                    );
+                  }
+                })));
   }
 
-/*
-Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        SwipeableCardsSection(
-          cardController: _cardController,
-          context: context,
-          //add the first 3 cards (widgets)
-          items: [],
-          //Get card swipe event callbacks
-          onCardSwiped: (dir, index, widget) {
-            //Add the next card using _cardController
-
-            //Take action on the swiped widget based on the direction of swipe
-            //Return false to not animate cards
-          },
-          //
-          enableSwipeUp: true,
-          enableSwipeDown: true,
-        ),
-        //other children
-      ]),
-*/
-  Widget getCard({required UserModel user}) {
+  Widget getCard(UserModel user) {
     return CachedNetworkImage(
-      imageUrl: user.profilePicture!,
+      imageUrl: user.profilePicture ??
+          'https://idaip.org.mx/gobiernoabierto/wp-content/uploads/2018/09/avatar-300x300.png',
       imageBuilder: (context, imageProvider) => Container(
-          height: 650,
-          width: 250,
+          width: double.infinity,
           decoration: BoxDecoration(
               image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
               borderRadius: const BorderRadius.all(Radius.circular(15))),

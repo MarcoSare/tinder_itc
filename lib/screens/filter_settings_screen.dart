@@ -1,7 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:provider/provider.dart';
+import 'package:tinder_itc/firebase/users_firebase.dart';
+import 'package:tinder_itc/models/filter_model.dart';
+import 'package:tinder_itc/models/user_model.dart';
+import 'package:tinder_itc/network/api_users.dart';
+import 'package:tinder_itc/provider/filters_provider.dart';
 import 'package:tinder_itc/provider/user_provider.dart';
+import 'package:tinder_itc/screens/dashboard_screen.dart';
+import 'package:tinder_itc/screens/home_screen.dart';
+import 'package:tinder_itc/screens/match_screen.dart';
+import 'package:tinder_itc/widgets/alert_widget.dart';
 import 'package:tinder_itc/widgets/list_carrer_widget.dart';
 import 'package:tinder_itc/widgets/list_gender_widget.dart';
 
@@ -13,110 +23,167 @@ class FilterSettingScreen extends StatefulWidget {
 }
 
 class _FilterSettingScreenState extends State<FilterSettingScreen> {
-  late String controlList = "female";
-  late String carrer = "Todas";
-  var rating = RangeValues(0.18, 0.23);
-  final mFirestore = FirebaseFirestore.instance;
+  var rating = const RangeValues(0.18, 0.23);
+  late bool allAges = false;
+  FilterModel? filterModel;
+  late UserModel userModel;
+  late ListCarrerWidget listCarrerWidget;
+  late ListGenderWidget listGenderWidget;
+  late AlertWidget alertWidget;
+  late FiltersProvider filterProvider;
+
   @override
   Widget build(BuildContext context) {
+    alertWidget = AlertWidget(context: context);
     final userProvider = Provider.of<UserProvider>(context);
+    filterProvider = Provider.of<FiltersProvider>(context);
+    userModel = userProvider.user!;
     return Scaffold(
         appBar: AppBar(
           title: const Text("Ajustes de búsqueda"),
         ),
-        body: StreamBuilder(
-            stream: mFirestore
-                .collection('usuarios')
-                .doc(userProvider.user!.id)
-                .collection('filters')
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const Text(
-                  'No Data...',
-                );
-              } else {
-                controlList = snapshot.data!.docs[0]['gender'].toString();
-                rating = RangeValues(snapshot.data!.docs[0]['ages'][0] / 100,
-                    snapshot.data!.docs[0]['ages'][1] / 100);
-                carrer = controlList = snapshot.data!.docs[0]['carrer'];
-                carrer = carrer == "all" ? "Todas" : carrer;
+        body: FutureBuilder(
+            future: getFilter(userProvider.user!.id!),
+            builder: (context, AsyncSnapshot<FilterModel> snapshot) {
+              if (snapshot.hasData) {
                 return ListView(
                   children: [
                     getCardPeopleShow(),
                     getCardAges(context),
                     getCardCarrer(),
-                    getButtom()
+                    getButtom(context)
                   ],
+                );
+              } else {
+                return const Center(
+                  child: Text("Loading..."),
                 );
               }
             }));
   }
 
-  Widget getCardAges(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(10),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.background,
-        borderRadius: const BorderRadius.all(Radius.circular(15)),
-        boxShadow: [
-          BoxShadow(
-            color: const Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
-            spreadRadius: 5,
-            blurRadius: 7,
-            offset: Offset(0, 1), // changes position of shadow
-          ),
-        ],
-      ),
-      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              "Rango de edades",
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-            ),
-            Text("${getAge(rating.start)} - ${getAge(rating.end)}",
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 20))
-          ],
-        ),
-        RangeSlider(
-            max: 0.5,
-            min: 0.18,
-            divisions: 50,
-            values: rating,
-            onChanged: (newRating) {
-              setState(() {
-                rating = newRating;
-              });
-            }),
-        Row(
-          children: [
-            const Expanded(
-                flex: 2,
-                child: Text(
-                  "Mostrarme de todas las edades",
-                  style: TextStyle(fontSize: 16),
-                )),
-            Expanded(
-                child: Switch(
-              // This bool value toggles the switch.
-              value: true,
-              activeColor: Theme.of(context).colorScheme.primary,
-              onChanged: (bool value) {
-                // This is called when the user toggles the switch.
-                setState(() {});
-              },
-            ))
-          ],
-        )
-      ]),
+  Future<FilterModel> getFilter(String id) async {
+    filterModel = await UsersFireBase.getFilters(id: id);
+    listCarrerWidget = ListCarrerWidget(
+      control: filterModel!.carrer!,
     );
+    listGenderWidget = ListGenderWidget(control: filterModel!.gender!);
+    if (filterModel!.ages == 'Todos') {
+      allAges = true;
+      rating = const RangeValues(0.18, 0.50);
+    } else {
+      List<dynamic> ages = filterModel!.ages;
+      rating = RangeValues(ages[0] / 100, ages[1] / 100);
+    }
+    return filterModel!;
   }
 
-  Widget getButtom() {
+  Future<bool> setFilters() async {
+    String gender = listGenderWidget.control;
+    String auxCarrer = listCarrerWidget.control;
+    List<int> rangeAges = List.empty(growable: true);
+
+    if (gender != 'Todos') {
+      if (gender == "Mujeres") {
+        gender = "female";
+      } else {
+        gender = "male";
+      }
+    }
+
+    if (!allAges) {
+      rangeAges.add(int.parse(getAge(rating.start)));
+      rangeAges.add(int.parse(getAge(rating.end)));
+    }
+    print(userModel.id!);
+    FilterModel newFilter = FilterModel(
+        id: filterModel!.id,
+        gender: gender,
+        carrer: auxCarrer,
+        ages: allAges ? 'Todos' : rangeAges);
+    bool res = await UsersFireBase.setFilters(
+        filter: newFilter, idUser: userModel.id!);
+    print(res);
+    return res;
+  }
+
+  Widget getCardAges(BuildContext context) {
+    return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+      return Container(
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.background,
+          borderRadius: const BorderRadius.all(Radius.circular(15)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: const Offset(0, 1), // changes position of shadow
+            ),
+          ],
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Rango de edades",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+              Text("${getAge(rating.start)} - ${getAge(rating.end)}",
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 20))
+            ],
+          ),
+          RangeSlider(
+              max: 0.5,
+              min: 0.18,
+              divisions: 50,
+              values: rating,
+              onChanged: (newRating) {
+                setState(() {
+                  if (newRating.end == 0.5) {
+                    allAges = true;
+                  } else {
+                    allAges = false;
+                  }
+                  rating = newRating;
+                });
+              }),
+          Row(
+            children: [
+              const Expanded(
+                  flex: 2,
+                  child: Text(
+                    "Mostrarme de todas las edades",
+                    style: TextStyle(fontSize: 16),
+                  )),
+              Expanded(
+                  child: Switch(
+                // This bool value toggles the switch.
+                value: allAges,
+                activeColor: Theme.of(context).colorScheme.primary,
+                onChanged: (bool newValue) {
+                  // This is called when the user toggles the switch.
+                  setState(() {
+                    if (newValue) {
+                      rating = const RangeValues(0.18, 0.50);
+                    }
+                    allAges = newValue;
+                  });
+                },
+              ))
+            ],
+          )
+        ]),
+      );
+    });
+  }
+
+  Widget getButtom(BuildContext context) {
     return Container(
         margin: const EdgeInsets.all(10),
         padding: const EdgeInsets.all(4),
@@ -155,7 +222,20 @@ class _FilterSettingScreenState extends State<FilterSettingScreen> {
               style: TextStyle(color: Colors.white, fontSize: 16),
             ),
           ),
-          onPressed: () {},
+          onPressed: () async {
+            alertWidget.showProgress();
+            await setFilters();
+            List<UserModel> listUsers =
+                await ApiUsers.getAllUsers(userModel.id!);
+            filterProvider.setFilter(listUsers);
+            alertWidget.closeProgress();
+            // ignore: use_build_context_synchronously
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const DashBoardScreen()),
+              (Route<dynamic> route) => false,
+            );
+          },
         ));
   }
 
@@ -168,10 +248,10 @@ class _FilterSettingScreenState extends State<FilterSettingScreen> {
         borderRadius: const BorderRadius.all(Radius.circular(15)),
         boxShadow: [
           BoxShadow(
-            color: Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
+            color: const Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
             spreadRadius: 5,
             blurRadius: 7,
-            offset: Offset(0, 1), // changes position of shadow
+            offset: const Offset(0, 1), // changes position of shadow
           ),
         ],
       ),
@@ -180,7 +260,7 @@ class _FilterSettingScreenState extends State<FilterSettingScreen> {
           "Muéstrame",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        ListGenderWidget(control: controlList)
+        listGenderWidget
       ]),
     );
   }
@@ -194,10 +274,10 @@ class _FilterSettingScreenState extends State<FilterSettingScreen> {
         borderRadius: const BorderRadius.all(Radius.circular(15)),
         boxShadow: [
           BoxShadow(
-            color: Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
+            color: const Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
             spreadRadius: 5,
             blurRadius: 7,
-            offset: Offset(0, 1), // changes position of shadow
+            offset: const Offset(0, 1), // changes position of shadow
           ),
         ],
       ),
@@ -206,7 +286,7 @@ class _FilterSettingScreenState extends State<FilterSettingScreen> {
           "Muéstrame por carrera",
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
-        ListCarrerWidget(control: carrer)
+        listCarrerWidget
       ]),
     );
   }

@@ -64,6 +64,7 @@ dependencies:
   loading_animation_widget: ^1.2.0+4
   shimmer: ^3.0.0
   get: ^4.6.5
+  swipe_cards: ^2.0.0+1
 
 
 

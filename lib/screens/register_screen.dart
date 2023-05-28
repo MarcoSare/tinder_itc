@@ -44,7 +44,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
       250,
       5);
   MultiSelectChipWidget? multiSelectInter;
-  DatePickerWidget birthdatePicker = DatePickerWidget(msgError: 'Selecciona una fecha porfavor...',);
+  DatePickerWidget birthdatePicker = DatePickerWidget(
+    msgError: 'Selecciona una fecha porfavor...',
+  );
   GenderSelectorWidget genderSelector = GenderSelectorWidget();
 
   late AlertWidget alertWidget;
@@ -75,10 +77,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'atardecer'
     ];
     multiSelectInter = MultiSelectChipWidget(items: interests!);
-    if(_auth.currentUser != null){ //Se entra aqui si se viene de algun proveedor de atenticación
-      currentUser=_auth.currentUser!;
-      _index.value=1;
+    /*
+    if (_auth.currentUser != null) {
+      //Se entra aqui si se viene de algun proveedor de atenticación
+      currentUser = _auth.currentUser!;
+      _index.value = 1;
     }
+    */
   }
 
   Widget _showPage() {
@@ -128,15 +133,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         break;
 
       case 1:
-        if (txtDescripcion.formKey.currentState!.validate() && birthdatePicker.formKey.currentState!.validate()) {
+        if (txtDescripcion.formKey.currentState!.validate() &&
+            birthdatePicker.formKey.currentState!.validate()) {
           print(txtDescripcion.controlador +
               ' ' +
               RegisterPage2.selectedCareer.toString() +
               ' ' +
-              RegisterPage2.selectedSemester.toString()+
-              ' '+
-              birthdatePicker.date.toString()+
-              ' '+
+              RegisterPage2.selectedSemester.toString() +
+              ' ' +
+              birthdatePicker.date.toString() +
+              ' ' +
               genderSelector.gender.toString());
           _index.value++;
         }
@@ -145,14 +151,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
       case 2:
         if (multiSelectInter!.formKey.currentState!.validate()) {
           alertWidget.showProgress();
-          (currentUser != null)? await createUserAuthProvider(): await createUser();
+          (currentUser != null)
+              ? await createUserAuthProvider()
+              : await createUser();
           alertWidget.closeProgress();
           _index.value++;
         }
 
-        
-      break;
-
+        break;
     }
   }
 
@@ -219,9 +225,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   onPressed: () {
                                     if (_index.value <= 0) {
                                       Navigator.pushNamed(context, '/login');
-                                    }else if(_index.value==1 && currentUser != null){
-                                      Fluttertoast.showToast(msg: 'Completa el registro por favor...', toastLength: Toast.LENGTH_LONG);
-                                    }else{
+                                    } else if (_index.value == 1 &&
+                                        currentUser != null) {
+                                      Fluttertoast.showToast(
+                                          msg:
+                                              'Completa el registro por favor...',
+                                          toastLength: Toast.LENGTH_LONG);
+                                    } else {
                                       _index.value--;
                                     }
                                   },
@@ -263,6 +273,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future createUser() async {
+    print("ggg " + birthdatePicker.date.toString());
     try {
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -270,28 +281,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
         password: txtPass.controlador,
       );
 
-
       String? urlImg = await uploadImg();
       final docUser = FirebaseFirestore.instance
           .collection('usuarios')
           .doc(userCredential.user!.uid);
       final user = UserModel(
+          uid: userCredential.user!.uid,
           name: txtName.controlador,
           email: textEmail.controlador,
           carrer: RegisterPage2.selectedCareer.toString(),
           semester: int.parse(RegisterPage2.selectedSemester.toString()),
-          birthdate: birthdatePicker.date,
-          gender: genderSelector.gender ? 'female': 'male',
+          birthdate: birthdatePicker.date.toString(),
+          gender: genderSelector.gender ? 'female' : 'male',
           aboutMe: txtDescripcion.controlador,
           interests: multiSelectInter?.interestsList,
           profilePicture: urlImg);
       final userJson = user.toJson();
-      
+
       await docUser.set(userJson).then((value) {
         userCredential.user!.sendEmailVerification();
       });
-
-      
 
       print('Usuario registrado con éxito: ${userCredential.user!.uid}');
     } on FirebaseAuthException catch (e) {
@@ -301,32 +310,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
         print('El correo electrónico ya está en uso.');
       }
     } catch (e) {
+      print("Hola perros volvi");
       print(e);
     }
   }
 
   Future createUserAuthProvider() async {
-    try{
-      final docUser = FirebaseFirestore.instance.collection('usuarios').doc(currentUser!.uid);
+    try {
+      final docUser = FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(currentUser!.uid);
       final user = UserModel(
-        name: currentUser!.displayName,
-        email: currentUser!.email,
-        carrer: RegisterPage2.selectedCareer,
-        semester: int.parse(RegisterPage2.selectedSemester.toString()),
-        aboutMe: txtDescripcion.controlador,
-        interests: multiSelectInter?.interestsList,
-        birthdate: birthdatePicker.date,
-        gender:genderSelector.gender ? 'female': 'male',
-        profilePicture: currentUser!.photoURL
-      );
+          uid: currentUser!.uid,
+          name: currentUser!.displayName,
+          email: currentUser!.email,
+          carrer: RegisterPage2.selectedCareer,
+          semester: int.parse(RegisterPage2.selectedSemester.toString()),
+          aboutMe: txtDescripcion.controlador,
+          interests: multiSelectInter?.interestsList,
+          birthdate: birthdatePicker.date.toString(),
+          gender: genderSelector.gender ? 'female' : 'male',
+          profilePicture: currentUser!.photoURL);
       final userJSON = user.toJson();
 
-      await docUser.set(userJSON).then((value) => print('usuario registrado con exito: ${currentUser!.uid}'));
-
-    }on FirebaseAuthException catch (e){
+      await docUser.set(userJSON).then((value) =>
+          print('usuario registrado con exito: ${currentUser!.uid}'));
+    } on FirebaseAuthException catch (e) {
       print(e.code);
-    } catch (e){
-      print (e);
+    } catch (e) {
+      print(e);
     }
   }
 

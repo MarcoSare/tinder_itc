@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 class UserModel {
   String? id;
+  String? uid;
   String? name;
   String? email;
   String? pass;
@@ -15,9 +16,11 @@ class UserModel {
   int? semester;
   String? aboutMe;
   List<String?>? interests;
+  String? tokenDevice;
 
   UserModel(
       {this.id,
+      this.uid,
       this.name,
       this.email,
       this.pass,
@@ -27,21 +30,23 @@ class UserModel {
       this.carrer,
       this.semester,
       this.aboutMe,
-      this.interests});
+      this.interests,
+      this.tokenDevice});
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'],
-      name: map['name'],
-      email: map['email'],
-      profilePicture: map['profile_picture'],
-      carrer: map['carrer'],
-      semester: map['semester'],
-      aboutMe: map['aboutMe'],
-      birthdate: map['birthdate'],
-      gender: map['gender'],
-      interests: List<String?>.from(map['interests']),
-    );
+        id: map['id'],
+        uid: map['uid'],
+        name: map['name'],
+        email: map['email'],
+        profilePicture: map['profile_picture'],
+        carrer: map['carrer'],
+        semester: map['semester'],
+        aboutMe: map['aboutMe'],
+        birthdate: map['birthdate'],
+        gender: map['gender'],
+        interests: List<String?>.from(map['interests']),
+        tokenDevice: map['tokenDevice']);
   }
 
   static String toMap(UserModel user) {
@@ -50,28 +55,33 @@ class UserModel {
 
   Map<String, dynamic> toJson() => {
         'id': id,
+        'uid': uid,
         'name': name,
         'email': email,
+        'gender': gender,
+        'birthdate': birthdate,
         'pass': pass,
         'profile_picture': profilePicture,
         'carrer': carrer,
         'semester': semester,
         'aboutMe': aboutMe,
-        'interests': interests
+        'interests': interests,
+        'tokenDevice': tokenDevice,
       };
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> map = doc.data() as Map<String, dynamic>;
     return UserModel(
-      id: map['id'],
-      name: map['name'],
-      email: map['email'],
-      profilePicture: map['profile_picture'],
-      birthdate: map['birthdate'],
-      gender: map['gender'],
-      carrer: map['carrer'],
-      semester: map['semester'],
-      aboutMe: map['aboutMe'],
-    );
+        id: map['id'],
+        uid: map['uid'],
+        name: map['name'],
+        email: map['email'],
+        profilePicture: map['profile_picture'],
+        birthdate: map['birthdate'],
+        gender: map['gender'],
+        carrer: map['carrer'],
+        semester: map['semester'],
+        aboutMe: map['aboutMe'],
+        tokenDevice: map['tokenDevice']);
   }
 }

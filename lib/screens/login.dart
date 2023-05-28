@@ -24,7 +24,6 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-
   late AlertWidget al;
   DateTime? currenBackTime;
 
@@ -32,7 +31,7 @@ class _LoginState extends State<Login> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    AppPreferences.firstTimeOpen=false;
+    AppPreferences.firstTimeOpen = false;
   }
 
   @override
@@ -45,62 +44,57 @@ class _LoginState extends State<Login> {
     GithubAuth _githubAuth = GithubAuth();
     al = AlertWidget(context: context);
 
-    final userProvider = Provider.of<UserProvider>(context,listen: false);
-    
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     final btnResend = TextButton(
-      onPressed: (){
-        _emailAuth.resendVerification(
-          email: txtEmail.controlador, 
-          password: txtPass.controlador
-        ).then((value) {
-          if(value=='email-resent'){
-            Fluttertoast.showToast(
-              msg: 'Email reenviado correctamente',
-              gravity: ToastGravity.CENTER_RIGHT,
-              backgroundColor: Colors.black
-            );
-            print('resent');
-          }
-        });
-      }, 
-      child: const Text('Reenviar verificación')
-    );
+        onPressed: () {
+          _emailAuth
+              .resendVerification(
+                  email: txtEmail.controlador, password: txtPass.controlador)
+              .then((value) {
+            if (value == 'email-resent') {
+              Fluttertoast.showToast(
+                  msg: 'Email reenviado correctamente',
+                  gravity: ToastGravity.CENTER_RIGHT,
+                  backgroundColor: Colors.black);
+              print('resent');
+            }
+          });
+        },
+        child: const Text('Reenviar verificación'));
 
     final btnOk = TextButton(
-      onPressed: (){
-        Navigator.pop(context);
-      }, 
-      child: const Text('Ok')
-    );
-
+        onPressed: () {
+          Navigator.pop(context);
+        },
+        child: const Text('Ok'));
 
     final btnRedirectReg = ElevatedButton(
-      onPressed: (){
-        Navigator.pushNamed(context, '/register');
-      },
-      child: const Text('Completar registro')
-    );
+        onPressed: () {
+          Navigator.pushNamed(context, '/register');
+        },
+        child: const Text('Completar registro'));
 
-
-    List<Widget> optionsResend = [
-      btnResend,
-      btnOk
-    ];
+    List<Widget> optionsResend = [btnResend, btnOk];
 
     final btnGoogle = SocialLoginButton(
       buttonType: SocialLoginButtonType.google,
-      mode:SocialLoginButtonMode.multi, 
-      onPressed: (){
+      mode: SocialLoginButtonMode.multi,
+      onPressed: () {
         _googleAuth.signInWithGoogle().then((value) {
-          if(value=='logged-successful'){
+          if (value == 'logged-successful') {
             //redireccionar al dashboard
-            AlertWidget.showMessage(context, 'Acceso exitoso', 'Has ingresado a tu cuenta');
+            AlertWidget.showMessage(
+                context, 'Acceso exitoso', 'Has ingresado a tu cuenta');
             userProvider.setUserData(UserPreferencesDev.getUserObject());
             Navigator.pushNamed(context, '/home');
-          }else if(value=='logged-without-info'){
-            //redireccionar al register_screen - RegisterScreen debe 
-            AlertWidget.showMessageWithActions(context, 'Creación exitoso', 'Tu cuenta de google ha sido creada correctamente, procede a completar el registro porfavor', [btnRedirectReg]);
+          } else if (value == 'logged-without-info') {
+            //redireccionar al register_screen - RegisterScreen debe
+            AlertWidget.showMessageWithActions(
+                context,
+                'Creación exitoso',
+                'Tu cuenta de google ha sido creada correctamente, procede a completar el registro porfavor',
+                [btnRedirectReg]);
           }
         });
       },
@@ -115,60 +109,71 @@ class _LoginState extends State<Login> {
     );
 
     final btnGithub = SocialLoginButton(
-      buttonType: SocialLoginButtonType.github, 
-      mode:SocialLoginButtonMode.multi,
-      onPressed: (){
+      buttonType: SocialLoginButtonType.github,
+      mode: SocialLoginButtonMode.multi,
+      onPressed: () {
         _githubAuth.signInWithGitHub(context).then((value) {
-          if(value=='logged-succesful'){
-            AlertWidget.showMessage(context, 'Inicio de sesión exitoso', 'Continua con tu experiencia...');
+          if (value == 'logged-succesful') {
+            AlertWidget.showMessage(context, 'Inicio de sesión exitoso',
+                'Continua con tu experiencia...');
             Navigator.pushNamed(context, '/home');
             userProvider.setUserData(UserPreferencesDev.getUserObject());
-          }else if(value=='logged-without-info'){
-            AlertWidget.showMessageWithActions(context, 'Registro exitoso', 'Tu cuenta  ha sido creada correctamente', [btnRedirectReg]);
-          }else if(value=='account-exists-with-different-credential'){
-            AlertWidget.showMessage(context, 'Error al iniciar sesión', 'Parece que el correo que estas intentando utilizar ya esta vinculada con otra cuenta...');
+          } else if (value == 'logged-without-info') {
+            AlertWidget.showMessageWithActions(context, 'Registro exitoso',
+                'Tu cuenta  ha sido creada correctamente', [btnRedirectReg]);
+          } else if (value == 'account-exists-with-different-credential') {
+            AlertWidget.showMessage(context, 'Error al iniciar sesión',
+                'Parece que el correo que estas intentando utilizar ya esta vinculada con otra cuenta...');
           }
         });
       },
       borderRadius: 15,
     );
 
-    final btnEmail =  SocialLoginButton(
+    final btnEmail = SocialLoginButton(
       buttonType: SocialLoginButtonType.generalLogin,
       mode: SocialLoginButtonMode.single,
       onPressed: () {
         txtEmail.formKey.currentState!.save();
         txtPass.formKey.currentState!.save();
-        if(txtEmail.controlador=='' || txtPass.controlador==''){
-          AlertWidget.showMessage(context, 'Error', 'Porfavor, rellena todos los campos antes de poder continuar.');
-        }else if(txtEmail.error==true){
-          AlertWidget.showMessage(context, 'Error', 'Porfavor, ingresa una dirección de correo válida');
-        }else if(txtPass.error==true){
-          AlertWidget.showMessage(context, 'Error', 'Porfavor, ingresa tu contraseña');
-        }else{
-          _emailAuth.signInWithEmailAndPass(
-            email: txtEmail.controlador, 
-            password: txtPass.controlador
-          ).then((value){
-            switch(value){
+        if (txtEmail.controlador == '' || txtPass.controlador == '') {
+          AlertWidget.showMessage(context, 'Error',
+              'Porfavor, rellena todos los campos antes de poder continuar.');
+        } else if (txtEmail.error == true) {
+          AlertWidget.showMessage(context, 'Error',
+              'Porfavor, ingresa una dirección de correo válida');
+        } else if (txtPass.error == true) {
+          AlertWidget.showMessage(
+              context, 'Error', 'Porfavor, ingresa tu contraseña');
+        } else {
+          _emailAuth
+              .signInWithEmailAndPass(
+                  email: txtEmail.controlador, password: txtPass.controlador)
+              .then((value) {
+            switch (value) {
               case 'wrong-password':
-                AlertWidget.showMessage(context, 'Error', 'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
-              break;
+                AlertWidget.showMessage(context, 'Error',
+                    'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
+                break;
 
               case 'invalid-email':
-                AlertWidget.showMessage(context, 'Error', 'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
-              break;
+                AlertWidget.showMessage(context, 'Error',
+                    'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
+                break;
 
               case 'user-not-found':
-                AlertWidget.showMessage(context, 'Error', 'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
-              break;
+                AlertWidget.showMessage(context, 'Error',
+                    'Tus credenciales de inicio de sesión no coinciden con ninguna cuenta en nuestro sistema... ');
+                break;
 
               case 'email-not-verified':
-                AlertWidget.showMessageWithActions(context, 'Error', 'Parece que aún no vertificas tu email...', optionsResend);
-              break;
+                AlertWidget.showMessageWithActions(context, 'Error',
+                    'Parece que aún no vertificas tu email...', optionsResend);
+                break;
 
               default:
                 userProvider.setUserData(UserPreferencesDev.getUserObject());
+
                 Navigator.pushNamed(context, '/home');
             }
           });
@@ -186,11 +191,10 @@ class _LoginState extends State<Login> {
             },
             child: const Text('Crear cuenta')),
         TextButton(
-          onPressed: () {
-            Navigator.pushNamed(context, '/forgot_password');
-          }, 
-          child: const Text('Recuperar contraseña')
-        ),
+            onPressed: () {
+              Navigator.pushNamed(context, '/forgot_password');
+            },
+            child: const Text('Recuperar contraseña')),
       ],
     );
 
@@ -247,11 +251,12 @@ class _LoginState extends State<Login> {
 
     Future<bool> onWillPop() async {
       DateTime now = DateTime.now();
-      if(currenBackTime == null || now.difference(currenBackTime!)> const Duration(seconds: 15)){
+      if (currenBackTime == null ||
+          now.difference(currenBackTime!) > const Duration(seconds: 15)) {
         currenBackTime = now;
         Fluttertoast.showToast(msg: '¿Seguro que quieres salir?');
         return false;
-      }else{
+      } else {
         SystemChannels.platform.invokeMethod('SystemNavigator.pop');
         return false;
       }
@@ -262,19 +267,14 @@ class _LoginState extends State<Login> {
         onWillPop: onWillPop,
         child: Responsive(
             mobile: MobileViewScreen(
-              formLogin: formLogin(
-                context, formEmailPass, rowSocial, rowDivider, rowOptions
-                )
-              ),
+                formLogin: formLogin(
+                    context, formEmailPass, rowSocial, rowDivider, rowOptions)),
             desktop: DesktopViewScreen(
-              formLogin: formLogin(
-                context, formEmailPass, rowSocial, rowDivider, rowOptions
-              ) 
-            )
-          ),
-        ),
-      );
-    }
+                formLogin: formLogin(context, formEmailPass, rowSocial,
+                    rowDivider, rowOptions))),
+      ),
+    );
+  }
 }
 
 class MobileViewScreen extends StatelessWidget {

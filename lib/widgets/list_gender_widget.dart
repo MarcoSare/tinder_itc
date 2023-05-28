@@ -21,7 +21,7 @@ class _ListGenderWidgetState extends State<ListGenderWidget> {
     }
   }
 
-  List<String> genders = ["Hombre", "Mujeres", "Todos"];
+  List<String> genders = ["Hombres", "Mujeres", "Todos"];
   late String dropDownValue;
   @override
   Widget build(BuildContext context) {

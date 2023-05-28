@@ -26,25 +26,29 @@ class _YourLikesState extends State<YourLikes> {
                 .snapshots(),
             builder: (context, snapshot) {
               if (!snapshot.hasData) {
-                return Text(
+                return const Text(
                   'No Data...',
                 );
               } else {
-                return GridView.builder(
-                  padding: const EdgeInsets.all(10),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount:
-                          (MediaQuery.of(context).size.width ~/ 170).toInt(),
-                      childAspectRatio: .9,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10),
-                  itemCount: snapshot.data!.docs.length,
-                  itemBuilder: (context, index) {
-                    return UserCardWidget(
-                        idUser:
-                            snapshot.data!.docs[index]['idUser'].toString());
-                  },
-                );
+                if (snapshot.data!.docs.isEmpty) {
+                  return const Text("No tienes likes");
+                } else {
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(10),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount:
+                            (MediaQuery.of(context).size.width ~/ 170).toInt(),
+                        childAspectRatio: .9,
+                        mainAxisSpacing: 10,
+                        crossAxisSpacing: 10),
+                    itemCount: snapshot.data!.docs.length,
+                    itemBuilder: (context, index) {
+                      return UserCardWidget(
+                          idUser:
+                              snapshot.data!.docs[index]['idUser'].toString());
+                    },
+                  );
+                }
               }
             }),
       ),

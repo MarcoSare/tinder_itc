@@ -24,8 +24,9 @@ class _ListCarrerWidgetState extends State<ListCarrerWidget> {
     'Ing. Ambiental',
     'Ing. Industrial',
     'Ing. Mecánica',
-    'Todas'
+    'Todos'
   ];
+
   late String dropDownValue;
   @override
   Widget build(BuildContext context) {

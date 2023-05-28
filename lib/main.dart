@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:tinder_itc/app_preferences.dart';
 import 'package:tinder_itc/models/user_model.dart';
+import 'package:tinder_itc/provider/filters_provider.dart';
 import 'package:tinder_itc/provider/user_provider.dart';
 import 'package:tinder_itc/routes.dart';
 import 'package:tinder_itc/screens/dashboard_screen.dart';
@@ -33,6 +34,7 @@ Future main() async {
     providers: [
       ChangeNotifierProvider<UserProvider>(
           create: (_) => UserProvider()..setUserData(userModel)),
+      ChangeNotifierProvider<FiltersProvider>(create: (_) => FiltersProvider())
     ],
     child: const MyApp(),
   ));
@@ -143,6 +145,7 @@ class _MyAppState extends State<MyApp> {
     FirebaseMessaging _firebaseMessage = FirebaseMessaging.instance;
 
     String? deviceToken = await _firebaseMessage.getToken();
-    return deviceToken ?? "";
+    AppPreferences.tokenDivice = deviceToken!;
+    return deviceToken;
   }
 }

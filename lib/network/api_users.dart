@@ -9,10 +9,9 @@ import 'package:tinder_itc/models/user_model.dart';
 
 class ApiUsers {
   static Future<List<UserModel>> getAllUsers(String idUser) async {
-    print("inicio");
     String fileName = "userData.json";
     final Directory tempDir = await getTemporaryDirectory();
-    File file = new File(tempDir.path + "/" + fileName);
+    File file = File("${tempDir.path}/$fileName");
     final dio = Dio();
     try {
       final response = await dio.get(
@@ -22,17 +21,14 @@ class ApiUsers {
           flush: true, mode: FileMode.write);
       final listJSON = data as List;
       if (response.statusCode == 200) {
-        print("fin");
         return listJSON.map((map) => UserModel.fromMap(map)).toList();
       }
       return List.empty();
     } on Exception catch (e) {
-      print("loading from cache");
       var jsonData = file.readAsStringSync();
       final data = jsonDecode(jsonData);
       final listJSON = data as List;
-      print("fin");
-      await Future.delayed(Duration(seconds: 1), () {});
+      //await Future.delayed(Duration(seconds: 1), () {});
       final users = listJSON.map((map) => UserModel.fromMap(map)).toList();
       return users;
     }
