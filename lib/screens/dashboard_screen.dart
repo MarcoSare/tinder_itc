@@ -10,6 +10,7 @@ import 'package:tinder_itc/firebase/google_auth.dart';
 import 'package:tinder_itc/screens/home_screen.dart';
 import 'package:tinder_itc/screens/likes_home_screen.dart';
 import 'package:tinder_itc/screens/match_screen.dart';
+import 'package:tinder_itc/screens/messaging_screen.dart';
 import 'package:tinder_itc/user_preferences_dev.dart';
 import 'package:tinder_itc/widgets/alert_widget.dart';
 
@@ -42,7 +43,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
     _widgetOptions = <Widget>[
       const MatchScreen(),
       const LikeHomeScreen(),
-      const HomeScreen(),
+      const MessagingScreen(),
       const Text("profile")
     ];
     super.initState();
@@ -139,7 +140,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.manage_search,
+                      icon: Icon(Icons.star,
                           color: _selectedIndex == 2 ? Colors.red : null),
                       onPressed: () {
                         setState(() {

@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -44,13 +45,30 @@ class _MatchScreenState extends State<MatchScreen> {
             content: u,
             likeAction: () {
               UsersFireBase.like(idFrom: idFrom, toUser: u).then((value) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  elevation: 6.0,
-                  behavior: SnackBarBehavior.floating,
-                  content: const Text("LIKE"),
-                  duration: const Duration(milliseconds: 500),
-                ));
+                if (value == 1) {
+                  Get.snackbar(
+                    "Haz hecho matchs",
+                    "Ve a tus matchs para seguir",
+                    icon: const Icon(Icons.favorite, color: Colors.pinkAccent),
+                    snackPosition: SnackPosition.TOP,
+                  );
+                } else if (value == 0) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    elevation: 6.0,
+                    behavior: SnackBarBehavior.floating,
+                    content: const Text("LIKE"),
+                    duration: const Duration(milliseconds: 500),
+                  ));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    backgroundColor: Theme.of(context).colorScheme.error,
+                    elevation: 6.0,
+                    behavior: SnackBarBehavior.floating,
+                    content: const Text("Ha ocurrido un error"),
+                    duration: const Duration(milliseconds: 500),
+                  ));
+                }
               });
             },
             nopeAction: () {

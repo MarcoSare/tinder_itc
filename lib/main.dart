@@ -11,6 +11,7 @@ import 'package:tinder_itc/routes.dart';
 import 'package:tinder_itc/screens/dashboard_screen.dart';
 import 'package:tinder_itc/screens/details_user.dart';
 import 'package:tinder_itc/screens/login.dart';
+import 'package:tinder_itc/screens/messaging_screen.dart';
 import 'package:tinder_itc/screens/on_boarding_screen.dart';
 import 'package:tinder_itc/settings/styles_settings.dart';
 import 'package:tinder_itc/user_preferences_dev.dart';
