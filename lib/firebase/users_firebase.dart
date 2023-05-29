@@ -6,6 +6,7 @@ import 'package:dio/dio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tinder_itc/models/filter_model.dart';
 import 'package:tinder_itc/models/user_model.dart';
+import 'package:tinder_itc/network/api_users.dart';
 
 class UsersFireBase {
   static Future<List<UserModel>> getAllUsers() async {
@@ -26,29 +27,35 @@ class UsersFireBase {
     }
   }
 
-  static Future<bool> like(
+  static Future<int> like(
       {required String idFrom, required UserModel toUser}) async {
-    CollectionReference collectionRef = FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(idFrom)
-        .collection('yourLikes');
-    await collectionRef.add({
-      'idUser': toUser.id,
-    });
-    collectionRef = FirebaseFirestore.instance
-        .collection('usuarios')
-        .doc(toUser.id)
-        .collection('likes');
-    await collectionRef.add({
-      'idUser': idFrom,
-    });
-    if (toUser.tokenDevice != null) {
-      print("si token");
-      await sendNotiLike(toUser: toUser);
-    } else {
-      print("no token");
+    try {
+      CollectionReference collectionRef = FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(idFrom)
+          .collection('yourLikes');
+      await collectionRef.add({
+        'idUser': toUser.id,
+      });
+      collectionRef = FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(toUser.id)
+          .collection('likes');
+      await collectionRef.add({
+        'idUser': idFrom,
+      });
+      if (toUser.tokenDevice != null) {
+        print("si token");
+        await sendNotiLike(toUser: toUser);
+        int response = await ApiUsers.like(idFrom, toUser.id!);
+        return response;
+      } else {
+        int response = await ApiUsers.like(idFrom, toUser.id!);
+        return response;
+      }
+    } on Exception catch (e) {
+      return -1;
     }
-    return true;
   }
 
   static Future<void> sendNotiLike({required UserModel toUser}) async {
