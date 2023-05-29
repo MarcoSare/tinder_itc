@@ -172,7 +172,7 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
             backgroundColor: Color.fromRGBO(23, 32, 42, 1),
             radius: 60,
             child: Selector<UserProvider, String>(
-                selector: (_, provider) => provider.user!.profilePicture!,
+                selector: (_, provider) => provider.user!.profilePicture ?? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
                 builder: (context, profilePicture, child) {
                   return CircleAvatar(
                     backgroundColor: Colors.transparent,

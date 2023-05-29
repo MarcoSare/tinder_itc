@@ -141,7 +141,12 @@ class _RegisterPage1State extends State<RegisterPage1> {
 }
 
 class RegisterPage2 extends StatefulWidget {
-  RegisterPage2({super.key, this.txtDescripcion, this.onChangeCareer, this.birthdatePicker, this.genderSelector});
+  RegisterPage2(
+      {super.key,
+      this.txtDescripcion,
+      this.onChangeCareer,
+      this.birthdatePicker,
+      this.genderSelector});
 
   Widget? txtDescripcion;
   Widget? birthdatePicker;
@@ -288,6 +293,166 @@ class _RegisterPage3State extends State<RegisterPage3> {
             child: widget.multiSelectorChip!)
       ],
     ));
+  }
+}
+
+class RegisterFilters extends StatefulWidget {
+  RegisterFilters({super.key, this.listCareer, this.listGender});
+
+  Widget? listCareer;
+  Widget? listGender;
+  static var rangeAges = List.empty(growable: true);
+  static bool allAges = false;
+  static var rating = const RangeValues(0.18, 0.23);
+
+  @override
+  State<RegisterFilters> createState() => _RegisterFiltersState();
+}
+
+class _RegisterFiltersState extends State<RegisterFilters> {
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        getListGender(),
+        getListCareer(),
+        getAgeRange()
+      ],
+    );
+  }
+
+  Widget getListGender() {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.background,
+        borderRadius: const BorderRadius.all(Radius.circular(15)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 1), // changes position of shadow
+          ),
+        ],
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text(
+          "Muéstrame",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        widget.listGender!
+      ]),
+    );
+  }
+
+  Widget getListCareer() {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.background,
+        borderRadius: const BorderRadius.all(Radius.circular(15)),
+        boxShadow: [
+          BoxShadow(
+            color: const Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
+            spreadRadius: 5,
+            blurRadius: 7,
+            offset: const Offset(0, 1), // changes position of shadow
+          ),
+        ],
+      ),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text(
+          "Muéstrame por carrera",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        widget.listCareer!
+      ]),
+    );
+  }
+
+  Widget getAgeRange() {
+    return StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+      return Container(
+        margin: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.background,
+          borderRadius: const BorderRadius.all(Radius.circular(15)),
+          boxShadow: [
+            BoxShadow(
+              color: const Color.fromARGB(255, 15, 15, 15).withOpacity(0.5),
+              spreadRadius: 5,
+              blurRadius: 7,
+              offset: const Offset(0, 1), // changes position of shadow
+            ),
+          ],
+        ),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Rango de edades",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+              ),
+              Text("${getAge(RegisterFilters.rating.start)} - ${getAge(RegisterFilters.rating.end)}",
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 20))
+            ],
+          ),
+          RangeSlider(
+              max: 0.5,
+              min: 0.18,
+              divisions: 50,
+              values: RegisterFilters.rating,
+              onChanged: (newRating) {
+                setState(() {
+                  if (newRating.end == 0.5) {
+                    RegisterFilters.allAges = true;
+                  } else {
+                    RegisterFilters.allAges = false;
+                  }
+                  RegisterFilters.rating = newRating;
+                });
+              }),
+          Row(
+            children: [
+              const Expanded(
+                  flex: 2,
+                  child: Text(
+                    "Mostrarme de todas las edades",
+                    style: TextStyle(fontSize: 16),
+                  )),
+              Expanded(
+                  child: Switch(
+                // This bool value toggles the switch.
+                value: RegisterFilters.allAges,
+                activeColor: Theme.of(context).colorScheme.primary,
+                onChanged: (bool newValue) {
+                  // This is called when the user toggles the switch.
+                  setState(() {
+                    if (newValue) {
+                      RegisterFilters.rating = const RangeValues(0.18, 0.50);
+                    }
+                    RegisterFilters.allAges = newValue;
+                  });
+                },
+              ))
+            ],
+          )
+        ]),
+      );
+    });
+  }
+
+  String getAge(double age) {
+    return (age * 100).round().toString();
   }
 }
 

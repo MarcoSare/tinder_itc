@@ -7,11 +7,16 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:tinder_itc/app_preferences.dart';
+import 'package:tinder_itc/firebase/users_firebase.dart';
+import 'package:tinder_itc/models/filter_model.dart';
 import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/screens/register_pages.dart';
 import 'package:tinder_itc/widgets/alert_widget.dart';
 import 'package:tinder_itc/widgets/date_picker_widget.dart';
 import 'package:tinder_itc/widgets/gender_selector_widget.dart';
+import 'package:tinder_itc/widgets/list_carrer_widget.dart';
+import 'package:tinder_itc/widgets/list_gender_widget.dart';
 import 'package:tinder_itc/widgets/multi_select_chip_widget.dart';
 import 'package:tinder_itc/widgets/text_email_widget.dart';
 import 'package:tinder_itc/widgets/text_form_widget.dart';
@@ -49,6 +54,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   );
   GenderSelectorWidget genderSelector = GenderSelectorWidget();
 
+  ListGenderWidget listGender = ListGenderWidget(control: 'Todos');
+  ListCarrerWidget listCareer = ListCarrerWidget(control: 'Todos');
+
   late AlertWidget alertWidget;
   FirebaseAuth _auth = FirebaseAuth.instance;
   User? currentUser;
@@ -77,13 +85,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'atardecer'
     ];
     multiSelectInter = MultiSelectChipWidget(items: interests!);
-    /*
+    
     if (_auth.currentUser != null) {
       //Se entra aqui si se viene de algun proveedor de atenticación
       currentUser = _auth.currentUser!;
       _index.value = 1;
     }
-    */
+   
   }
 
   Widget _showPage() {
@@ -94,18 +102,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
           txtPass: txtPass,
           txtName: txtName,
         );
+
       case 1:
         return RegisterPage2(
           txtDescripcion: txtDescripcion,
           birthdatePicker: birthdatePicker,
           genderSelector: genderSelector,
         );
+
       case 2:
+        return RegisterFilters(
+          listCareer: listCareer,
+          listGender: listGender
+        );
+    
+      case 3:
         return RegisterPage3(
           multiSelectorChip: multiSelectInter,
         );
-      case 3:
+
+      case 4:
         return const RegisterSuccess();
+
       default:
         return Container();
     }
@@ -149,6 +167,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         break;
 
       case 2:
+        if(!RegisterFilters.allAges){
+          RegisterFilters.rangeAges.clear();
+          RegisterFilters.rangeAges.add(int.parse(getAge(RegisterFilters.rating.start)));
+          RegisterFilters.rangeAges.add(int.parse(getAge(RegisterFilters.rating.end)));
+        }
+        print(listCareer.control+' '+listGender.control);
+        print(RegisterFilters.allAges? 'Todos':  RegisterFilters.rangeAges.toString());
+        _index.value++;
+      break;
+
+      case 3:
         if (multiSelectInter!.formKey.currentState!.validate()) {
           alertWidget.showProgress();
           (currentUser != null)
@@ -157,8 +186,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           alertWidget.closeProgress();
           _index.value++;
         }
+      break;
 
-        break;
+
     }
   }
 
@@ -198,7 +228,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _showPage(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: (_index.value == 3)
+                        children: (_index.value == 4)
                             ? [
                                 ElevatedButton(
                                     onPressed: () =>
@@ -240,10 +270,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   style: ElevatedButton.styleFrom(
                                       padding: const EdgeInsets.all(20),
                                       shape: const CircleBorder(),
-                                      backgroundColor: (_index.value == 2)
+                                      backgroundColor: (_index.value == 3)
                                           ? Color.fromARGB(255, 123, 230, 126)
                                           : Colors.white),
-                                  child: (_index.value == 2)
+                                  child: (_index.value == 3)
                                       ? const Icon(Icons.check, size: 50)
                                       : const Icon(Icons.arrow_forward_ios,
                                           size: 50),
@@ -272,8 +302,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
+  String getAge(double age) {
+    return (age * 100).round().toString();
+  }
+
   Future createUser() async {
-    print("ggg " + birthdatePicker.date.toString());
     try {
       UserCredential userCredential =
           await FirebaseAuth.instance.createUserWithEmailAndPassword(
@@ -285,6 +318,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final docUser = FirebaseFirestore.instance
           .collection('usuarios')
           .doc(userCredential.user!.uid);
+
+      String gender;
+     switch (listGender.control) {
+       case 'Mujeres':
+         gender = 'female';
+        break;
+
+        case 'Hombres':
+         gender = 'male';
+        break;
+
+       default:
+        gender = 'Todos';
+     }
+      
+      final filters = FilterModel(
+        id: userCredential.user!.uid,
+        gender: gender,
+        carrer: listCareer.control,
+        ages: RegisterFilters.allAges? 'Todos' : RegisterFilters.rangeAges
+      );
+
       final user = UserModel(
           uid: userCredential.user!.uid,
           name: txtName.controlador,
@@ -295,12 +350,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
           gender: genderSelector.gender ? 'female' : 'male',
           aboutMe: txtDescripcion.controlador,
           interests: multiSelectInter?.interestsList,
-          profilePicture: urlImg);
+          profilePicture: urlImg,
+          tokenDevice: AppPreferences.tokenDivice);
       final userJson = user.toJson();
 
-      await docUser.set(userJson).then((value) {
+      await docUser.set(userJson).then((value) async {
+        await UsersFireBase.createFilters(filter: filters, idUser: userCredential.user!.uid);
         userCredential.user!.sendEmailVerification();
       });
+
+      
 
       print('Usuario registrado con éxito: ${userCredential.user!.uid}');
     } on FirebaseAuthException catch (e) {
@@ -320,6 +379,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final docUser = FirebaseFirestore.instance
           .collection('usuarios')
           .doc(currentUser!.uid);
+
+      String gender;
+      switch (listGender.control) {
+       case 'Mujeres':
+         gender = 'female';
+        break;
+
+        case 'Hombres':
+         gender = 'male';
+        break;
+
+       default:
+        gender = 'Todos';
+     }
+
+      final filters = FilterModel(
+        id: currentUser!.uid,
+        gender: gender,
+        carrer: listCareer.control,
+        ages: RegisterFilters.allAges? 'Todos' : RegisterFilters.rangeAges
+      );
+
       final user = UserModel(
           uid: currentUser!.uid,
           name: currentUser!.displayName,
@@ -330,11 +411,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           interests: multiSelectInter?.interestsList,
           birthdate: birthdatePicker.date.toString(),
           gender: genderSelector.gender ? 'female' : 'male',
-          profilePicture: currentUser!.photoURL);
+          profilePicture: currentUser!.photoURL,
+          tokenDevice: AppPreferences.tokenDivice);
       final userJSON = user.toJson();
 
-      await docUser.set(userJSON).then((value) =>
-          print('usuario registrado con exito: ${currentUser!.uid}'));
+      await docUser.set(userJSON).then((value) async {
+        print('usuario registrado con exito: ${currentUser!.uid}');
+        await UsersFireBase.createFilters(filter: filters, idUser: currentUser!.uid);
+      });
     } on FirebaseAuthException catch (e) {
       print(e.code);
     } catch (e) {

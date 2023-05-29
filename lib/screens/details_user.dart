@@ -30,7 +30,7 @@ class _DetailsUserState extends State<DetailsUser> {
                 child: Stack(
                   children: [
                     Image.network(
-                      widget.user.profilePicture!,
+                      widget.user.profilePicture ?? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
                       height: 450,
                       width: width,
                       fit: BoxFit.fill,

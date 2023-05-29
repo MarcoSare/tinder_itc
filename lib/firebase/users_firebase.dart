@@ -121,4 +121,24 @@ class UsersFireBase {
       return false;
     }
   }
+
+  static Future<bool> createFilters(
+      {required FilterModel filter, required String idUser}) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('usuarios')
+          .doc(idUser)
+          .collection('filters')
+          .doc(filter.id)
+          .set({
+        'ages': filter.ages,
+        'carrer': filter.carrer,
+        'gender': filter.gender
+      });
+      return true;
+    } on Exception catch (e) {
+      print("error");
+      return false;
+    }
+  }
 }

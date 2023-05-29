@@ -22,7 +22,7 @@ class _UserCardWidgetState extends State<UserCardWidget> {
               width: 200.0,
               decoration: BoxDecoration(
                   image: DecorationImage(
-                      image: NetworkImage(snapshot.data!.profilePicture!),
+                      image: NetworkImage(snapshot.data!.profilePicture ?? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png'),
                       fit: BoxFit.cover),
                   borderRadius: const BorderRadius.all(Radius.circular(15))),
               child: Container(
