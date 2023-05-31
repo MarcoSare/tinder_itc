@@ -7,7 +7,7 @@ class MultiSelectChipWidget extends StatefulWidget {
 
   var initialValues;
   List<String?> items;
-  List<String?> interestsList=[];
+  List<String?> interestsList = [];
 
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
   @override
@@ -15,36 +15,44 @@ class MultiSelectChipWidget extends StatefulWidget {
 }
 
 class _MultiSelectChipWidgetState extends State<MultiSelectChipWidget> {
-
   @override
   void initState() {
     super.initState();
-    if(widget.initialValues != null){
+    if (widget.initialValues != null) {
       widget.interestsList.addAll(widget.initialValues);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return  Form(
+    return Form(
       key: widget.formKey,
       child: MultiSelectChipField(
-        items: widget.items.map<MultiSelectItem<String?>>((value) => MultiSelectItem(value, value!) ).toList(),
-        validator: (value){
-          if(value==null || value.isEmpty){
-            return 'Selecciona al menos 1 tema de interés, por favor.';
-          }
-        },
-        scroll: false,
-        onTap: (values){
-          setState(() {
-            widget.interestsList=values;
-            print(widget.interestsList);
-          });
-        },
-        title: const Text('Selecciona tus intereses'),
-        initialValue: widget.interestsList
-      ),
+          headerColor: Colors.transparent,
+          chipColor: const Color(0xFFFFB3B5),
+          textStyle: const TextStyle(color: Colors.black),
+          selectedTextStyle: const TextStyle(color: Colors.white),
+          selectedChipColor: const Color(0xFF920025),
+          decoration:
+              BoxDecoration(border: Border.all(color: Colors.transparent)),
+          items: widget.items
+              .map<MultiSelectItem<String?>>(
+                  (value) => MultiSelectItem(value, value!))
+              .toList(),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Selecciona al menos 1 tema de interés, por favor.';
+            }
+          },
+          scroll: false,
+          onTap: (values) {
+            setState(() {
+              widget.interestsList = values;
+              print(widget.interestsList);
+            });
+          },
+          title: const Text('Selecciona tus intereses'),
+          initialValue: widget.interestsList),
     );
   }
 }

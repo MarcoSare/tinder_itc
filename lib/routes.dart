@@ -5,6 +5,7 @@ import 'package:tinder_itc/screens/forgot_password_screen.dart';
 import 'package:tinder_itc/screens/home_screen.dart';
 import 'package:tinder_itc/screens/login.dart';
 import 'package:tinder_itc/screens/register_screen.dart';
+import 'package:tinder_itc/screens/settings_screen.dart';
 import 'package:tinder_itc/screens/update_profile_screen.dart';
 
 Map<String, WidgetBuilder> getApplicationRoutes() {
@@ -14,6 +15,7 @@ Map<String, WidgetBuilder> getApplicationRoutes() {
     '/forgot_password': (BuildContext context) => const ForgotPasswordScreen(),
     '/update_profile': (BuildContext context) => UpdateProfileScreen(),
     '/home': (BuildContext context) => const DashBoardScreen(),
-    '/filter_settings': (BuildContext context) => const FilterSettingScreen()
+    '/filter_settings': (BuildContext context) => const FilterSettingScreen(),
+    '/settings': (BuildContext context) => const SettingScreen()
   };
 }

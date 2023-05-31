@@ -44,8 +44,9 @@ class _LikeScreenState extends State<LikeScreen> {
                     itemCount: snapshot.data!.docs.length,
                     itemBuilder: (context, index) {
                       return UserCardWidget(
-                          idUser:
-                              snapshot.data!.docs[index]['idUser'].toString());
+                        idUser: snapshot.data!.docs[index]['idUser'].toString(),
+                        isYourLike: false,
+                      );
                     },
                   );
                 }

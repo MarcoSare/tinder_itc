@@ -1,11 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:tinder_itc/app_preferences.dart';
 import 'package:tinder_itc/models/user_model.dart';
 import 'package:tinder_itc/provider/filters_provider.dart';
+import 'package:tinder_itc/provider/theme_provider.dart';
 import 'package:tinder_itc/provider/user_provider.dart';
 import 'package:tinder_itc/routes.dart';
 import 'package:tinder_itc/screens/dashboard_screen.dart';
@@ -13,7 +15,9 @@ import 'package:tinder_itc/screens/details_user.dart';
 import 'package:tinder_itc/screens/login.dart';
 import 'package:tinder_itc/screens/messaging_screen.dart';
 import 'package:tinder_itc/screens/on_boarding_screen.dart';
+import 'package:tinder_itc/screens/settings_screen.dart';
 import 'package:tinder_itc/settings/styles_settings.dart';
+import 'package:tinder_itc/theme_preferences.dart';
 import 'package:tinder_itc/user_preferences_dev.dart';
 
 import 'notifications.dart';
@@ -31,14 +35,18 @@ Future main() async {
   FirebaseMessaging.onBackgroundMessage(backgroundMessageHandler);
   final userModel = await UserPreferencesDev.getUserObject();
 
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider<UserProvider>(
-          create: (_) => UserProvider()..setUserData(userModel)),
-      ChangeNotifierProvider<FiltersProvider>(create: (_) => FiltersProvider())
-    ],
-    child: const MyApp(),
-  ));
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp])
+      .then((_) {
+    runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider<UserProvider>(
+            create: (_) => UserProvider()..setUserData(userModel)),
+        ChangeNotifierProvider<FiltersProvider>(
+            create: (_) => FiltersProvider()),
+      ],
+      child: const MyApp(),
+    ));
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -49,6 +57,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  late bool theme;
   late UserModel userModel;
   @override
   void initState() {
@@ -81,12 +90,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   initData() async {
+    ThemePreferences themePreferences = ThemePreferences();
     userModel = await UserPreferencesDev.getUserObject();
+    theme = await themePreferences.getTheme() ?? true;
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
+    //final userProvider = Provider.of<UserProvider>(context);
     return FutureBuilder(
         future: initData(),
         builder: (context, AsyncSnapshot<dynamic> snapshot) {
@@ -98,22 +109,30 @@ class _MyAppState extends State<MyApp> {
                   child: Center(child: CircularProgressIndicator()));
 
             case ConnectionState.done:
-              return GetMaterialApp(
-                  debugShowCheckedModeBanner: false,
-                  routes: getApplicationRoutes(),
-                  title: 'Flutter Demo',
-                  theme: StylesSettings.darkTheme,
-                  home: Builder(
-                    builder: (context) {
-                      if (AppPreferences.firstTimeOpen == true) {
-                        return const OnBoardingScreen();
-                      } else if (UserPreferencesDev.user != '["no_user"]') {
-                        return DashBoardScreen();
-                      } else {
-                        return Login();
-                      }
-                    },
-                  ));
+              return ChangeNotifierProvider(
+                  create: (context) => ThemeProvider()..init(theme),
+                  builder: (context, _) {
+                    final themeProvider = Provider.of<ThemeProvider>(context);
+                    return GetMaterialApp(
+                        debugShowCheckedModeBanner: false,
+                        routes: getApplicationRoutes(),
+                        title: 'Flutter Demo',
+                        themeMode: themeProvider.themeMode,
+                        theme: StylesSettings.lightTheme,
+                        darkTheme: StylesSettings.darkTheme,
+                        home: Builder(
+                          builder: (context) {
+                            if (AppPreferences.firstTimeOpen == true) {
+                              return const OnBoardingScreen();
+                            } else if (UserPreferencesDev.user !=
+                                '["no_user"]') {
+                              return const DashBoardScreen();
+                            } else {
+                              return Login();
+                            }
+                          },
+                        ));
+                  });
           }
         });
   }

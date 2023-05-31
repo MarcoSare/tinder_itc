@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tinder_itc/firebase/users_firebase.dart';
@@ -28,59 +29,64 @@ class _UserMatchCardWidgetState extends State<UserMatchCardWidget> {
                               friendId: widget.idUser,
                               friendImage: snapshot.data!.profilePicture!,
                               friendName: snapshot.data!.name!,
+                              device: snapshot.data!.tokenDevice,
                             )));
                 //ChatScreen
               },
-              child: Container(
-                width: 200.0,
-                height: 200,
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-                        image: NetworkImage(snapshot.data!.profilePicture!),
-                        fit: BoxFit.cover),
-                    borderRadius: const BorderRadius.all(Radius.circular(15))),
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(15)),
-                      gradient: LinearGradient(
-                        begin: Alignment.center,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black54,
-                          Colors.black87,
-                        ],
-                      )),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '${snapshot.data!.name!} 23',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Row(
-                        children: [
-                          Container(
-                            height: 10,
-                            width: 10,
-                            decoration: const BoxDecoration(
-                                color: Colors.green, shape: BoxShape.circle),
+              child: CachedNetworkImage(
+                  imageUrl: snapshot.data!.profilePicture!,
+                  imageBuilder: (context, imageProvider) => Container(
+                        width: 200.0,
+                        height: 200,
+                        decoration: BoxDecoration(
+                            image: DecorationImage(
+                                image: imageProvider, fit: BoxFit.cover),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(15))),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: const BoxDecoration(
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(15)),
+                              gradient: LinearGradient(
+                                begin: Alignment.center,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.black54,
+                                  Colors.black87,
+                                ],
+                              )),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${snapshot.data!.name!}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Container(
+                                    height: 10,
+                                    width: 10,
+                                    decoration: const BoxDecoration(
+                                        color: Colors.green,
+                                        shape: BoxShape.circle),
+                                  ),
+                                  const Padding(
+                                    padding: EdgeInsets.only(left: 10),
+                                    child: Text("En linea"),
+                                  )
+                                ],
+                              )
+                            ],
                           ),
-                          const Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text("En linea"),
-                          )
-                        ],
-                      )
-                    ],
-                  ),
-                ),
-              ),
+                        ),
+                      )),
             );
           } else {
             return SizedBox(

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:multi_select_flutter/bottom_sheet/multi_select_bottom_sheet.dart';
 import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
 import 'package:multi_select_flutter/chip_field/multi_select_chip_field.dart';
 import 'package:multi_select_flutter/util/multi_select_item.dart';
+import 'package:provider/provider.dart';
+import 'package:tinder_itc/firebase/users_firebase.dart';
 import 'package:tinder_itc/models/user_model.dart';
+import 'package:tinder_itc/provider/user_provider.dart';
 
 class DetailsUser extends StatefulWidget {
   UserModel user;
-  DetailsUser({super.key, required this.user});
+  bool isLiked;
+  DetailsUser({super.key, required this.user, required this.isLiked});
 
   @override
   State<DetailsUser> createState() => _DetailsUserState();
@@ -16,6 +21,7 @@ class DetailsUser extends StatefulWidget {
 class _DetailsUserState extends State<DetailsUser> {
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
 
@@ -30,7 +36,8 @@ class _DetailsUserState extends State<DetailsUser> {
                 child: Stack(
                   children: [
                     Image.network(
-                      widget.user.profilePicture ?? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
+                      widget.user.profilePicture ??
+                          'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
                       height: 450,
                       width: width,
                       fit: BoxFit.fill,
@@ -58,7 +65,9 @@ class _DetailsUserState extends State<DetailsUser> {
                               )),
                           height: 100,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
                             style: ElevatedButton.styleFrom(
                                 elevation: 0,
                                 backgroundColor: Colors.transparent,
@@ -85,11 +94,11 @@ class _DetailsUserState extends State<DetailsUser> {
                           style: const TextStyle(
                               fontWeight: FontWeight.bold, fontSize: 24),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.only(left: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
                           child: Text(
-                            "23",
-                            style: TextStyle(fontSize: 24),
+                            widget.user.age.toString(),
+                            style: const TextStyle(fontSize: 24),
                           ),
                         ),
                       ],
@@ -102,11 +111,11 @@ class _DetailsUserState extends State<DetailsUser> {
                           decoration: const BoxDecoration(
                               color: Colors.green, shape: BoxShape.circle),
                         ),
-                        const Padding(
-                          padding: EdgeInsets.only(left: 10),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10),
                           child: Text(
-                            "En linea",
-                            style: TextStyle(fontSize: 18),
+                            widget.user.carrer!,
+                            style: const TextStyle(fontSize: 18),
                           ),
                         )
                       ],
@@ -188,73 +197,120 @@ class _DetailsUserState extends State<DetailsUser> {
               )
             ],
           ),
-          bottomNavigationBar: Container(
-              padding: const EdgeInsets.symmetric(vertical: 10.0),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.center,
-                  end: Alignment.bottomCenter,
-                  colors: Theme.of(context).brightness == Brightness.light
-                      ? [
-                          Colors.transparent,
-                          const Color.fromARGB(171, 152, 152, 152),
-                          const Color.fromARGB(208, 119, 119, 119),
-                        ]
-                      : [
-                          Colors.transparent,
-                          const Color.fromARGB(171, 14, 14, 14),
-                          const Color.fromARGB(208, 9, 9, 9),
-                        ],
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    height: 100,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: const CircleBorder()),
-                      child: const Icon(
-                        Icons.close,
-                        color: Colors.red,
-                        size: 32,
-                      ),
+          bottomNavigationBar: widget.isLiked
+              ? Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.center,
+                      end: Alignment.bottomCenter,
+                      colors: Theme.of(context).brightness == Brightness.light
+                          ? [
+                              Colors.transparent,
+                              const Color.fromARGB(171, 152, 152, 152),
+                              const Color.fromARGB(208, 119, 119, 119),
+                            ]
+                          : [
+                              Colors.transparent,
+                              const Color.fromARGB(171, 14, 14, 14),
+                              const Color.fromARGB(208, 9, 9, 9),
+                            ],
                     ),
                   ),
-                  SizedBox(
-                    height: 100,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: const CircleBorder()),
-                      child: const Icon(
-                        Icons.star,
-                        color: Colors.blue,
-                        size: 32,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 100,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: const CircleBorder()),
+                          child: const Icon(
+                            Icons.close,
+                            color: Colors.red,
+                            size: 32,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 100,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          shape: const CircleBorder()),
-                      child: const Icon(
-                        Icons.favorite,
-                        color: Colors.pinkAccent,
-                        size: 32,
+                      SizedBox(
+                        height: 100,
+                        child: ElevatedButton(
+                          onPressed: () {},
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: const CircleBorder()),
+                          child: const Icon(
+                            Icons.star,
+                            color: Colors.blue,
+                            size: 32,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ],
-              ))),
+                      SizedBox(
+                        height: 100,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            UsersFireBase.like(
+                                    idFrom: userProvider.user!.id!,
+                                    toUser: widget.user)
+                                .then((value) {
+                              if (value == 1) {
+                                Get.snackbar(
+                                  "Haz hecho matchs",
+                                  "Ve a tus matchs para seguir",
+                                  icon: const Icon(Icons.favorite,
+                                      color: Colors.pinkAccent),
+                                  snackPosition: SnackPosition.TOP,
+                                );
+                              } else if (value == 0) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  elevation: 6.0,
+                                  behavior: SnackBarBehavior.floating,
+                                  content: const Text("LIKE"),
+                                  duration: const Duration(milliseconds: 500),
+                                ));
+                              } else if (value == 2) {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  elevation: 6.0,
+                                  behavior: SnackBarBehavior.floating,
+                                  content: const Text("Ya has dado like"),
+                                  duration: const Duration(milliseconds: 500),
+                                ));
+                              } else {
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(SnackBar(
+                                  backgroundColor:
+                                      Theme.of(context).colorScheme.error,
+                                  elevation: 6.0,
+                                  behavior: SnackBarBehavior.floating,
+                                  content: const Text("Ha ocurrido un error"),
+                                  duration: const Duration(milliseconds: 500),
+                                ));
+                              }
+                            });
+                          },
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: const CircleBorder()),
+                          child: const Icon(
+                            Icons.favorite,
+                            color: Colors.pinkAccent,
+                            size: 32,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ))
+              : const SizedBox()),
     );
   }
 }

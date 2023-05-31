@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tinder_itc/firebase/users_firebase.dart';
 
 class MessageTextField extends StatefulWidget {
   final String currentId;
   final String friendId;
+  final String? device;
+  final String name;
 
-  MessageTextField(this.currentId, this.friendId);
+  MessageTextField(this.currentId, this.friendId, this.device, this.name);
 
   @override
   _MessageTextFieldState createState() => _MessageTextFieldState();
@@ -81,6 +84,20 @@ class _MessageTextFieldState extends State<MessageTextField> {
                     .doc(widget.currentId)
                     .set({"last_msg": message});
               });
+              if (widget.device != null) {
+                print(widget.device);
+                UsersFireBase.sendNoti(data: {
+                  'to': widget.device!,
+                  'notification': {
+                    'body': message,
+                    'OrganizationId': '2',
+                    "content_available": true,
+                    "priority": "high",
+                    "subtitle": 'Nuevo mensaje',
+                    "title": widget.name
+                  },
+                });
+              }
             },
             child: Container(
               padding: const EdgeInsets.all(8),

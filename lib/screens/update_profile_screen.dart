@@ -159,7 +159,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     txtNombre.controlador = userModel.name ?? 'no_name';
     txtDesc.controlador = userModel.aboutMe ?? 'no_desc';
     interestSelector!.initialValues = userModel.interests ?? [''];
-    widget.image = userModel.profilePicture ?? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
+    widget.image = userModel.profilePicture ??
+        'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png';
 
     final dropCareer = StatefulBuilder(
       builder: (context, setState) {
@@ -192,19 +193,19 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
               firstSemester = value!;
             });
           },
-
         );
       },
     );
 
-    final btnUpdate = ElevatedButton(onPressed: () async{
-      await updateUser(userProvider);
-    },
-    child: const Text('Actualizar perfil'));
+    final btnUpdate = ElevatedButton(
+        onPressed: () async {
+          await updateUser(userProvider);
+        },
+        child: const Text('Actualizar perfil'));
 
     return Scaffold(
       body: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.all(20),
         child: Center(
           child: SingleChildScrollView(
             scrollDirection: Axis.vertical,
@@ -252,11 +253,12 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     );
   }
 
-  Future updateUser(UserProvider userProvider) async{
+  Future updateUser(UserProvider userProvider) async {
     try {
       final uid = FirebaseAuth.instance.currentUser!.uid;
       final email = FirebaseAuth.instance.currentUser!.email;
-      final docUser = FirebaseFirestore.instance.collection('usuarios').doc(uid);
+      final docUser =
+          FirebaseFirestore.instance.collection('usuarios').doc(uid);
       final resultImg = await updatePicture();
       UserModel userData;
       userData = UserModel(
@@ -265,22 +267,24 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           email: email,
           semester: selectedSemester ?? firstSemester,
           aboutMe: txtDesc.controlador,
-          interests: interestSelector!.interestsList.isEmpty ? interestSelector!.initialValues: interestSelector!.interestsList,
-          profilePicture: resultImg != false ? resultImg : widget.image
-        );
+          interests: interestSelector!.interestsList.isEmpty
+              ? interestSelector!.initialValues
+              : interestSelector!.interestsList,
+          profilePicture: resultImg != false ? resultImg : widget.image);
       final userJSON = userData.toJson();
 
-      await docUser.update(userJSON).then((value) => userProvider.setUserData(userData));
+      await docUser
+          .update(userJSON)
+          .then((value) => userProvider.setUserData(userData));
 
       print('actualizao');
-
     } catch (e) {
       print(e);
     }
   }
 
-  Future<dynamic> updatePicture() async{
-    if(_path!=null){
+  Future<dynamic> updatePicture() async {
+    if (_path != null) {
       try {
         File img = _path!;
         final storage = FirebaseStorage.instance;
@@ -294,9 +298,8 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
       } catch (e) {
         return false;
       }
-    }else{
+    } else {
       return false;
     }
   }
-
 }

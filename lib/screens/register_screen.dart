@@ -85,13 +85,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
       'atardecer'
     ];
     multiSelectInter = MultiSelectChipWidget(items: interests!);
-    
+
     if (_auth.currentUser != null) {
       //Se entra aqui si se viene de algun proveedor de atenticación
       currentUser = _auth.currentUser!;
       _index.value = 1;
     }
-   
   }
 
   Widget _showPage() {
@@ -111,11 +110,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
 
       case 2:
-        return RegisterFilters(
-          listCareer: listCareer,
-          listGender: listGender
-        );
-    
+        return RegisterFilters(listCareer: listCareer, listGender: listGender);
+
       case 3:
         return RegisterPage3(
           multiSelectorChip: multiSelectInter,
@@ -167,15 +163,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
         break;
 
       case 2:
-        if(!RegisterFilters.allAges){
+        if (!RegisterFilters.allAges) {
           RegisterFilters.rangeAges.clear();
-          RegisterFilters.rangeAges.add(int.parse(getAge(RegisterFilters.rating.start)));
-          RegisterFilters.rangeAges.add(int.parse(getAge(RegisterFilters.rating.end)));
+          RegisterFilters.rangeAges
+              .add(int.parse(getAge(RegisterFilters.rating.start)));
+          RegisterFilters.rangeAges
+              .add(int.parse(getAge(RegisterFilters.rating.end)));
         }
-        print(listCareer.control+' '+listGender.control);
-        print(RegisterFilters.allAges? 'Todos':  RegisterFilters.rangeAges.toString());
+        print(listCareer.control + ' ' + listGender.control);
+        print(RegisterFilters.allAges
+            ? 'Todos'
+            : RegisterFilters.rangeAges.toString());
         _index.value++;
-      break;
+        break;
 
       case 3:
         if (multiSelectInter!.formKey.currentState!.validate()) {
@@ -186,9 +186,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           alertWidget.closeProgress();
           _index.value++;
         }
-      break;
-
-
+        break;
     }
   }
 
@@ -320,25 +318,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
           .doc(userCredential.user!.uid);
 
       String gender;
-     switch (listGender.control) {
-       case 'Mujeres':
-         gender = 'female';
-        break;
+      switch (listGender.control) {
+        case 'Mujeres':
+          gender = 'female';
+          break;
 
         case 'Hombres':
-         gender = 'male';
-        break;
+          gender = 'male';
+          break;
 
-       default:
-        gender = 'Todos';
-     }
-      
+        default:
+          gender = 'Todos';
+      }
+
       final filters = FilterModel(
-        id: userCredential.user!.uid,
-        gender: gender,
-        carrer: listCareer.control,
-        ages: RegisterFilters.allAges? 'Todos' : RegisterFilters.rangeAges
-      );
+          id: userCredential.user!.uid,
+          gender: gender,
+          carrer: listCareer.control,
+          ages: RegisterFilters.allAges ? 'Todos' : RegisterFilters.rangeAges);
 
       final user = UserModel(
           uid: userCredential.user!.uid,
@@ -355,11 +352,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final userJson = user.toJson();
 
       await docUser.set(userJson).then((value) async {
-        await UsersFireBase.createFilters(filter: filters, idUser: userCredential.user!.uid);
+        await UsersFireBase.createFilters(
+            filter: filters, idUser: userCredential.user!.uid);
         userCredential.user!.sendEmailVerification();
       });
-
-      
 
       print('Usuario registrado con éxito: ${userCredential.user!.uid}');
     } on FirebaseAuthException catch (e) {
@@ -382,24 +378,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       String gender;
       switch (listGender.control) {
-       case 'Mujeres':
-         gender = 'female';
-        break;
+        case 'Mujeres':
+          gender = 'female';
+          break;
 
         case 'Hombres':
-         gender = 'male';
-        break;
+          gender = 'male';
+          break;
 
-       default:
-        gender = 'Todos';
-     }
+        default:
+          gender = 'Todos';
+      }
 
       final filters = FilterModel(
-        id: currentUser!.uid,
-        gender: gender,
-        carrer: listCareer.control,
-        ages: RegisterFilters.allAges? 'Todos' : RegisterFilters.rangeAges
-      );
+          id: currentUser!.uid,
+          gender: gender,
+          carrer: listCareer.control,
+          ages: RegisterFilters.allAges ? 'Todos' : RegisterFilters.rangeAges);
 
       final user = UserModel(
           uid: currentUser!.uid,
@@ -417,7 +412,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       await docUser.set(userJSON).then((value) async {
         print('usuario registrado con exito: ${currentUser!.uid}');
-        await UsersFireBase.createFilters(filter: filters, idUser: currentUser!.uid);
+        await UsersFireBase.createFilters(
+            filter: filters, idUser: currentUser!.uid);
       });
     } on FirebaseAuthException catch (e) {
       print(e.code);

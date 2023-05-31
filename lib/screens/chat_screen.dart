@@ -12,12 +12,13 @@ class ChatScreen extends StatelessWidget {
   final String friendId;
   final String friendName;
   final String friendImage;
+  final String? device;
 
-  ChatScreen({
-    required this.friendId,
-    required this.friendName,
-    required this.friendImage,
-  });
+  ChatScreen(
+      {required this.friendId,
+      required this.friendName,
+      required this.friendImage,
+      required this.device});
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +90,8 @@ class ChatScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }),
           )),
-          MessageTextField(userProvider.user!.id!, friendId),
+          MessageTextField(userProvider.user!.id!, friendId, device,
+              userProvider.user!.name!),
         ],
       ),
     );

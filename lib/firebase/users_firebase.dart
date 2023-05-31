@@ -30,47 +30,57 @@ class UsersFireBase {
   static Future<int> like(
       {required String idFrom, required UserModel toUser}) async {
     try {
-      CollectionReference collectionRef = FirebaseFirestore.instance
-          .collection('usuarios')
+      final docUser = FirebaseFirestore.instance
+          .collection("usuarios")
           .doc(idFrom)
-          .collection('yourLikes');
-      await collectionRef.add({
-        'idUser': toUser.id,
-      });
-      collectionRef = FirebaseFirestore.instance
-          .collection('usuarios')
-          .doc(toUser.id)
-          .collection('likes');
-      await collectionRef.add({
-        'idUser': idFrom,
-      });
-      if (toUser.tokenDevice != null) {
-        print("si token");
-        await sendNotiLike(toUser: toUser);
-        int response = await ApiUsers.like(idFrom, toUser.id!);
-        return response;
+          .collection("yourLikes")
+          .where("idUser", isEqualTo: toUser.id);
+      final snapshot = await docUser.get();
+
+      if (snapshot.size <= 0) {
+        CollectionReference collectionRef = FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(idFrom)
+            .collection('yourLikes');
+        await collectionRef.add({
+          'idUser': toUser.id,
+        });
+        collectionRef = FirebaseFirestore.instance
+            .collection('usuarios')
+            .doc(toUser.id)
+            .collection('likes');
+        await collectionRef.add({
+          'idUser': idFrom,
+        });
+        if (toUser.tokenDevice != null) {
+          await sendNoti(data: {
+            'to': toUser.tokenDevice,
+            'notification': {
+              'body': 'Has recibido un like',
+              'OrganizationId': '2',
+              "content_available": true,
+              "priority": "high",
+              "subtitle": "Revisa tu perfil ahora",
+              "title": "Nuevo like"
+            },
+          });
+          int response = await ApiUsers.like(idFrom, toUser.id!);
+          return response;
+        } else {
+          int response = await ApiUsers.like(idFrom, toUser.id!);
+          return response;
+        }
       } else {
-        int response = await ApiUsers.like(idFrom, toUser.id!);
-        return response;
+        return 2;
       }
     } on Exception catch (e) {
       return -1;
     }
   }
 
-  static Future<void> sendNotiLike({required UserModel toUser}) async {
+  static Future<void> sendNoti({required Map<String, dynamic> data}) async {
     final dio = Dio();
-    Map<String, dynamic> data = {
-      'to': toUser.tokenDevice,
-      'notification': {
-        'body': 'Has recibido un like',
-        'OrganizationId': '2',
-        "content_available": true,
-        "priority": "high",
-        "subtitle": "Revisa tu perfil ahora",
-        "title": "Nuevo like"
-      },
-    };
+
     Map<String, dynamic> headers = {
       'Authorization':
           'key=AAAAEYI9mCc:APA91bGk4YeSGchJr9Utj9B4Eq2KlA2O87zMndeUXDWTGaubfGAdFxyGSXD1oKHRO_68yTdcu9qPkQJlGdxHZscRkSn1o9l2Kow9DFYPM5Da-m2om_ccxVOj17GEfbvRS61rFg1kyM4N',

@@ -17,6 +17,7 @@ class UserModel {
   String? aboutMe;
   List<String?>? interests;
   String? tokenDevice;
+  int? age;
 
   UserModel(
       {this.id,
@@ -31,7 +32,8 @@ class UserModel {
       this.semester,
       this.aboutMe,
       this.interests,
-      this.tokenDevice});
+      this.tokenDevice,
+      this.age});
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
@@ -46,7 +48,8 @@ class UserModel {
         birthdate: map['birthdate'],
         gender: map['gender'],
         interests: List<String?>.from(map['interests']),
-        tokenDevice: map['tokenDevice']);
+        tokenDevice: map['tokenDevice'],
+        age: map['age']);
   }
 
   static String toMap(UserModel user) {
@@ -67,6 +70,7 @@ class UserModel {
         'aboutMe': aboutMe,
         'interests': interests,
         'tokenDevice': tokenDevice,
+        'age': age
       };
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -82,6 +86,7 @@ class UserModel {
         carrer: map['carrer'],
         semester: map['semester'],
         aboutMe: map['aboutMe'],
-        tokenDevice: map['tokenDevice']);
+        tokenDevice: map['tokenDevice'],
+        age: map['age']);
   }
 }

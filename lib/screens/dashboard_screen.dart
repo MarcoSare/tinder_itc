@@ -97,12 +97,6 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
                     Navigator.pushNamed(context, '/filter_settings');
                   },
                   icon: const Icon(Icons.tune)),
-              IconButton(
-                  onPressed: () {
-                    AlertWidget.showMessageWithActions(context,
-                        'Cerrando sesión', '¿Estas seguro?', logoutActions);
-                  },
-                  icon: const Icon(Icons.exit_to_app))
             ],
           ),
           body: IndexedStack(
@@ -167,13 +161,15 @@ class _DashBoardScreenState extends State<DashBoardScreen> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(60))),
           onPressed: () {
-            Navigator.pushNamed(context, '/update_profile');
+            Navigator.pushNamed(context, '/settings');
           },
           child: CircleAvatar(
             backgroundColor: Color.fromRGBO(23, 32, 42, 1),
             radius: 60,
             child: Selector<UserProvider, String>(
-                selector: (_, provider) => provider.user!.profilePicture ?? 'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
+                selector: (_, provider) =>
+                    provider.user!.profilePicture ??
+                    'https://upload.wikimedia.org/wikipedia/commons/8/89/Portrait_Placeholder.png',
                 builder: (context, profilePicture, child) {
                   return CircleAvatar(
                     backgroundColor: Colors.transparent,

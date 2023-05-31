@@ -310,16 +310,11 @@ class RegisterFilters extends StatefulWidget {
 }
 
 class _RegisterFiltersState extends State<RegisterFilters> {
-
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        getListGender(),
-        getListCareer(),
-        getAgeRange()
-      ],
+      children: [getListGender(), getListCareer(), getAgeRange()],
     );
   }
 
@@ -401,7 +396,8 @@ class _RegisterFiltersState extends State<RegisterFilters> {
                 "Rango de edades",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
               ),
-              Text("${getAge(RegisterFilters.rating.start)} - ${getAge(RegisterFilters.rating.end)}",
+              Text(
+                  "${getAge(RegisterFilters.rating.start)} - ${getAge(RegisterFilters.rating.end)}",
                   style: const TextStyle(
                       fontWeight: FontWeight.bold, fontSize: 20))
             ],

@@ -101,13 +101,6 @@ class _LoginState extends State<Login> {
       borderRadius: 15,
     );
 
-    final btnFacebook = SocialLoginButton(
-      buttonType: SocialLoginButtonType.facebook,
-      mode: SocialLoginButtonMode.multi,
-      onPressed: () {},
-      borderRadius: 15,
-    );
-
     final btnGithub = SocialLoginButton(
       buttonType: SocialLoginButtonType.github,
       mode: SocialLoginButtonMode.multi,
@@ -131,6 +124,7 @@ class _LoginState extends State<Login> {
     );
 
     final btnEmail = SocialLoginButton(
+      backgroundColor: Theme.of(context).colorScheme.primary,
       buttonType: SocialLoginButtonType.generalLogin,
       mode: SocialLoginButtonMode.single,
       onPressed: () {
@@ -204,11 +198,11 @@ class _LoginState extends State<Login> {
     );
 
     final rowSocial = SizedBox(
-      height: 200,
+      height: 130,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         mainAxisSize: MainAxisSize.max,
-        children: [btnGoogle, btnFacebook, btnGithub],
+        children: [btnGoogle, btnGithub],
       ),
     );
 

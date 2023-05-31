@@ -38,7 +38,7 @@ class _MatchScreenState extends State<MatchScreen> {
 
   initData(String idFrom) async {
     List<UserModel> response = await ApiUsers.getAllUsers(idFrom);
-    print("aaaa" + AppPreferences.token);
+
     for (UserModel u in response) {
       _swipeItems.add(
         SwipeItem(
@@ -58,6 +58,14 @@ class _MatchScreenState extends State<MatchScreen> {
                     elevation: 6.0,
                     behavior: SnackBarBehavior.floating,
                     content: const Text("LIKE"),
+                    duration: const Duration(milliseconds: 500),
+                  ));
+                } else if (value == 2) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    elevation: 6.0,
+                    behavior: SnackBarBehavior.floating,
+                    content: const Text("Ya has dado like"),
                     duration: const Duration(milliseconds: 500),
                   ));
                 } else {
@@ -328,7 +336,7 @@ class _MatchScreenState extends State<MatchScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${user.name!} 23',
+                    '${user.name!} ${user.age}',
                     style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -337,34 +345,40 @@ class _MatchScreenState extends State<MatchScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            height: 10,
-                            width: 10,
-                            decoration: const BoxDecoration(
-                                color: Colors.green, shape: BoxShape.circle),
-                          ),
-                          const Padding(
-                            padding: EdgeInsets.only(left: 10),
-                            child: Text(
-                              "En linea",
-                              style:
-                                  TextStyle(fontSize: 18, color: Colors.white),
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              height: 10,
+                              width: 10,
+                              decoration: const BoxDecoration(
+                                  color: Colors.green, shape: BoxShape.circle),
                             ),
-                          )
-                        ],
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Text(
+                                  user.carrer!,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      fontSize: 18, color: Colors.white),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                       SizedBox(
                         height: 30,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => DetailsUser(
-                                          user: user,
-                                        )));
+                            Get.to(
+                                () => DetailsUser(
+                                      user: user,
+                                      isLiked: true,
+                                    ),
+                                transition: Transition.downToUp,
+                                duration: const Duration(milliseconds: 500));
                           },
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
